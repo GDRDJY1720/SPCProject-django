@@ -24,13 +24,17 @@ class UserSerializer(serializers.Serializer):
 class QueryDeviceListSerializer(serializers.ModelSerializer):
     status = serializers.SerializerMethodField()
     product_name = serializers.SerializerMethodField()  # 自定义显示
+    product_key = serializers.SerializerMethodField()
 
     class Meta:
         model = Dmodels.Device
-        fields = ['actual_device_secret', 'product_name', 'status']
+        fields = ['actual_device_secret', 'product_name', 'product_key', 'status']
 
     def get_product_name(self, row):
         return row.from_product.productname
+
+    def get_product_key(self, row):
+        return row.from_product.productkey
 
     def get_status(self, row):
         for s in self.context.get('status'):
