@@ -29,11 +29,18 @@ class ProductView(GenericViewSet):
             return Response(res)
 
         product_list = dic['Data']['List']['ProductInfo']
+        new_product_list = []
         for product in product_list:
+            new_product_list.append(product.get('ProductKey'))
             models.Product.objects.update_or_create(productkey=product.get('ProductKey'),
                                                     defaults={
                                                         'productname': product.get('ProductName')
                                                     })
+
+        local_product_list = models.Product.objects.values_list('productkey', flat=True)
+        for lo in local_product_list:
+            if lo not in new_product_list:
+                models.Product.objects.filter(productkey=lo).delete()
         # ============================> END <=======================================
 
         if request.user.from_privilege == 1:
