@@ -1,7 +1,5 @@
 # _*_ coding:utf-8 _*_
 
-import json
-
 from rest_framework import serializers, exceptions
 
 from account import models as Umodels

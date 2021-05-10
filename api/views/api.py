@@ -14,6 +14,7 @@ from api.utils import serializers
 from device import models as Dmodels
 from product import models as Pmodels
 from account import models as Umodels
+from api import models as Tmodels
 from account.tool import account
 
 
@@ -183,19 +184,17 @@ class SetTask(GenericAPIView, ali_api.APIRun):
 
     def post(self, request, *args, **kwargs):
         res = {'code': 1000, 'msg': ''}
+        params = {}
 
         device_secret = request.data.get('deviceSecret', None)
-        task_id = request.data.get('TaskID', None)
+        task_id = request.data.get('taskID', None)
         item = request.data.get('items', None)
+        task_info = request.data.get('taskInfo', None)
+        task_submit_rul = request.data.get('submitUrl', None)
 
         if device_secret is None:
             res['code'] = 1050
             res['msg'] = 'deviceSecret参数缺失'
-            return Response(res)
-
-        if task_id is None:
-            res['code'] = 1050
-            res['msg'] = 'taskId参数缺失'
             return Response(res)
 
         if item is None:
@@ -204,14 +203,6 @@ class SetTask(GenericAPIView, ali_api.APIRun):
             return Response(res)
 
         try:
-            task = int(task_id)
-        except Exception:
-            res['code'] = 1049
-            res['msg'] = 'taskId参数错误'
-            return Response(res)
-
-        try:
-            item['TaskId'] = task
             item['TaskFlag'] = 0
             items = json.dumps(item)
         except Exception:
@@ -224,6 +215,27 @@ class SetTask(GenericAPIView, ali_api.APIRun):
             res['code'] = 1010
             res['msg'] = '设备不存在'
             return Response(res)
+
+        # 添加任务的提交地址以及提交信息字段，同时在任务信息有下发请求的时候，存储任务编号，任务其他信息等基本任务信息 5-10
+        if task_id:
+            params['taskId'] = task_id
+
+        if task_info:
+            params['taskInfo'] = json.dumps(task_info)
+            print(params['taskInfo'], type(params['taskInfo']))
+
+        if task_submit_rul:
+            params['taskSubmitUrl'] = task_submit_rul
+
+        if task_info or task_id or task_submit_rul:
+            print(params)
+            try:
+                Tmodels.Task.objects.update_or_create(fk_device=device, defaults=params)
+            except Exception as e:
+                print(e)
+                res['code'] = 1050
+                res['msg'] = '参数有错误，请检查参数合法性'
+                return Response(res)
 
         self.get_api_run(res=res, api_name='SetDevicesProperty', Items=items, ProductKey=device.from_product.productkey,
                          DeviceNameList=[device.device_name, ])

@@ -2,15 +2,15 @@
 
 from django.urls import re_path
 
-from api import views
+from api.views import api, task
 
 urlpatterns = [
-    re_path(r'^(?P<version>v\d+)/GetToken/$', views.UserView.as_view()),
-    re_path(r'^(?P<version>v\d+)/QueryDeviceList/$', views.QueryDeviceList.as_view()),
-    re_path(r'^(?P<version>v\d+)/QueryProductList/$', views.QueryProductList.as_view()),
-    re_path(r'^(?P<version>v\d+)/QueryPropertyList/$', views.QueryPropertyList.as_view()),
-    re_path(r'^(?P<version>v\d+)/SetProperty/$', views.SetProperty.as_view()),
-    re_path(r'^(?P<version>v\d+)/SetTask/$', views.SetTask.as_view()),
+    re_path(r'^(?P<version>v\d+)/GetToken/$', api.UserView.as_view()),
+    re_path(r'^(?P<version>v\d+)/QueryDeviceList/$', api.QueryDeviceList.as_view()),
+    re_path(r'^(?P<version>v\d+)/QueryProductList/$', api.QueryProductList.as_view()),
+    re_path(r'^(?P<version>v\d+)/QueryPropertyList/$', api.QueryPropertyList.as_view()),
+    re_path(r'^(?P<version>v\d+)/SetProperty/$', api.SetProperty.as_view()),
+    re_path(r'^(?P<version>v\d+)/SetTask/$', api.SetTask.as_view()),
 
 
     # re_path(r'^(?P<version>v\d+)/device/$', views.DeviceView.as_view({'get': 'list'})),
