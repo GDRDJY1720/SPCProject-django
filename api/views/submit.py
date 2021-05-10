@@ -9,11 +9,13 @@ from api import models
 
 
 class TaskSubmitView(GenericAPIView):
+    authentication_classes = []
 
     def post(self, request, *args, **kwargs):
         res = {'code': 1000, 'msg': ''}
 
         device_name = request.data.get('deviceName', None)
+        task_status = request.data.get('taskStatus', None)
 
         if device_name is None:
             res['code'] = 1050
@@ -23,7 +25,10 @@ class TaskSubmitView(GenericAPIView):
         task = models.Task.objects.filter(fk_device__device_name=device_name).first()
 
         url = task.taskSubmitUrl
-        data = {}
+        data = {
+            'taskId': task.taskId,
+            'taskStatus': task_status
+        }
         task_info = json.loads(task.taskInfo)
         task_data = json.loads(task.taskSubmitInfo)
         for i in task_data:
