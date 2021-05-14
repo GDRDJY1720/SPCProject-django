@@ -37,6 +37,8 @@ class AlarmSerialiser(serializers.ModelSerializer):
         return row.alarm_starttime.strftime('%Y-%m-%d %H:%M:%S')
 
     def get_alarm_endtime(self, row):
+        if row.alarm_endtime is None:
+            return None
         return row.alarm_endtime.strftime('%Y-%m-%d %H:%M:%S')
 
 
