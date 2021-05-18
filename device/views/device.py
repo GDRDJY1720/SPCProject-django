@@ -1,4 +1,5 @@
 # _*_ coding:utf-8 _*_
+import json
 import time
 
 from commonTool import ali_api
@@ -408,3 +409,58 @@ class DeviceDataView(GenericViewSet, ali_api.APIRun):
         ser = self.get_serializer(instance=device_online_list, many=True)
         res['data'] = ser.data
         return Response(res)
+
+
+class DeviceLockView(GenericViewSet, ali_api.APIRun):
+    queryset = models.Device.objects.all()
+    serializer_class = None
+    pagination_class = CommonPagination
+
+    Api = ali_api.AliPropertyAPI()
+
+    def lock(self, request, *args, **kwargs):
+        res = {'code': 1000, 'msg': ''}
+        params = {}
+
+        sign = request.data.get('sign', 'deviceId')
+        data = request.data.get('data', None)
+        if data is None:
+            res['code'] = 1050
+            res['msg'] = 'sign的具体参数缺失'
+            return Response(res)
+
+        if sign == 'deviceId':
+            params['id'] = data
+        elif sign == 'deviceName':
+            params['device_name'] = data
+
+        device_obj = models.Device.objects.filter(**params).first()
+        if not device_obj:
+            res['code'] = 1010
+            res['msg'] = '设备不存在'
+            return Response(res)
+
+        lockFlag = int(request.data.get('lockFlag', '1'))
+        # lockFlag == 1表示为立即锁定，0为解除锁定
+        if lockFlag:
+            items = '{"DeviceOnLock":1}'
+
+            self.get_api_run(res=res, api_name='SetDeviceProperty', Items=items,
+                             IotId=device_obj.iot_id)
+            if res['code'] != 1000:
+                return Response(res)
+
+            models.Device.objects.filter(**params).update(deviceOnLock=True)
+
+        else:
+            items = '{"DeviceOnLock":0}'
+
+            self.get_api_run(res=res, api_name='SetDeviceProperty', Items=items,
+                             IotId=device_obj.iot_id)
+            if res['code'] != 1000:
+                return Response(res)
+
+            models.Device.objects.filter(**params).update(deviceOnLock=False)
+
+        return Response(res)
+

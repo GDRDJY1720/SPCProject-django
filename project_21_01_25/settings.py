@@ -145,4 +145,5 @@ REST_FRAMEWORK = {
     "DEFAULT_VERSION": 'v1',
     "ALLOWED_VERSIONS": ['v1'],
     "VERSION_PARAM": 'version',
+    # 'EXCEPTION_HANDLER': 'utils.exception.exception_handler',
 }

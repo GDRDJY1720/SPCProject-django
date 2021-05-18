@@ -12,6 +12,7 @@ class Device(models.Model):
     from_user = models.ForeignKey(to='account.UserInfo', on_delete=models.DO_NOTHING, default=1, null=True)
     actual_device_secret = models.CharField('设备序列号', max_length=32, null=True, unique=True)
     module_secret = models.CharField(max_length=32, null=True, unique=True)
+    deviceOnLock = models.BooleanField(default=False)
     device_type = models.IntegerField(default=2)
     device_longitude = models.FloatField(default=103.984727)
     device_latitude = models.FloatField(default=30.969819)
