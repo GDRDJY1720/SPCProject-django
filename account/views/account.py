@@ -15,9 +15,9 @@ class LoginView(APIView):
 
     def post(self, request, *args, **kwargs):
         res = {'code': 1000, 'msg': None}
-        ser = serializer.LoginSerialiser(data=request.data)
+        ser = serializer.LoginSerializer(data=request.data)
         if ser.is_valid():
-            user = ser.validated_data['phoneNum']
+            user = ser.validated_data['username']
 
             if user.password != account.md5(user.username, [ser.validated_data['password'], user.phonenum]):
                 res['msg'] = '密码错误'
@@ -34,11 +34,11 @@ class LoginView(APIView):
                                                                             defaults={'start_time': now,
                                                                                       'token': m,
                                                                                       'end_time': time_out})
-            token_ser = serializer.TokenSerialiser(instance=token_obj, context={'request': request})
+            token_ser = serializer.TokenSerializer(instance=token_obj, context={'request': request})
             res['data'] = token_ser.data
             return Response(res)
         else:
-            msg = ser.errors.get('phonenum', None) or ser.errors.get('password', None)
+            msg = ser.errors.get('username', None) or ser.errors.get('password', None)
             res['code'] = 1001
             res['msg'] = msg[0]
             return Response(res)

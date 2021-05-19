@@ -14,7 +14,7 @@ class UserInfo(models.Model):
     # 密码加密是username+password+phonenum
     # 后续需要考虑忘记密码的时候如何找回密码
     password = models.CharField(max_length=32)
-    useremail = models.EmailField(null=True)
+    useremail = models.EmailField(null=True, unique=True)
     phonenum = models.CharField(max_length=11, unique=True)
     # userphoto = models.ImageField(upload_to='img', blank=True, null=True)
     from_privilege = models.IntegerField(choices=privilege_choices)

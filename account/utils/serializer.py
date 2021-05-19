@@ -1,23 +1,43 @@
 # _*_ coding:utf-8 _*_
 
+import re
+
 from rest_framework import serializers
 from rest_framework import exceptions
 from account import models
 
 
-class LoginSerialiser(serializers.Serializer):
-    phoneNum = serializers.CharField(error_messages={'blank': '不能为空'})
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField(error_messages={'blank': '不能为空'})
     password = serializers.CharField(error_messages={'blank': '不能为空'})
 
-    def validate_phoneNum(self, value):
-        user = models.UserInfo.objects.filter(phonenum=value).first()
+    def update(self, instance, validated_data):
+        pass
+
+    def create(self, validated_data):
+        pass
+
+    @staticmethod
+    def validate_username(value):
+        params = {}
+        phone = re.match('^[1-9]{11}$', value)
+        if phone is not None:
+            params['phonenum'] = value
+        else:
+            email = re.match('^[a-zA-Z0-9]+([-_.][a-zA-Z0-9]+)*@[a-zA-Z0-9]+([-_.][a-zA-Z0-9]+)*\.[a-z]{2,}$', value)
+            if email is not None:
+                params['useremail'] = value
+            else:
+                raise exceptions.ValidationError('请输入正确的手机号或邮箱')
+
+        user = models.UserInfo.objects.filter(**params).first()
         if not user:
-            raise exceptions.ValidationError('用户不存在')
+            raise exceptions.ValidationError('用户不存在，请注册')
 
         return user
 
 
-class TokenSerialiser(serializers.ModelSerializer):
+class TokenSerializer(serializers.ModelSerializer):
     privilege = serializers.SerializerMethodField()
     user_name = serializers.SerializerMethodField()
     end_time = serializers.SerializerMethodField()
