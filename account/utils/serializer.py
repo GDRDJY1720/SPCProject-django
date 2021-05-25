@@ -28,11 +28,12 @@ class LoginSerializer(serializers.Serializer):
             if email is not None:
                 params['useremail'] = value
             else:
-                raise exceptions.ValidationError('请输入正确的手机号或邮箱')
+                params['username'] = value
 
         user = models.UserInfo.objects.filter(**params).first()
+
         if not user:
-            raise exceptions.ValidationError('用户不存在，请注册')
+            raise exceptions.ValidationError('用户不存在，请检查用户信息是否输入正确')
 
         return user
 
