@@ -109,6 +109,26 @@ class DeviceInfoView(GenericViewSet):
             param['from_product_id'] = product_id
             device_list = models.Device.objects.filter(**param).order_by('-id')
 
+        elif sign == 'deviceSecret':
+            device_secret = request.query_params.get('data', None)
+            if device_secret is None:
+                res['code'] = 1050
+                res['msg'] = 'deviceSecret参数缺失'
+                return Response(res)
+
+            param['actual_device_secret'] = device_secret
+            device_list = models.Device.objects.filter(**param).order_by('-id')
+
+        elif sign == 'moduleSecret':
+            module_secret = request.query_params.get('data', None)
+            if module_secret is None:
+                res['code'] = 1050
+                res['msg'] = 'moduleSecret参数缺失'
+                return Response(res)
+
+            param['module_secret'] = module_secret
+            device_list = models.Device.objects.filter(**param).order_by('-id')
+
         # 状态的筛选涉及到多次循环调用接口进行选择，同时也涉及到用户权限的问题，较为复杂，后续如有好方法再加
         # elif sign == 'status':
         #     status = request.query_params.get('data', None)
