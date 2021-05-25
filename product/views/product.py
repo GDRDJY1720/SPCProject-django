@@ -44,7 +44,7 @@ class ProductView(GenericViewSet):
         # ============================> END <=======================================
 
         if request.user.from_privilege == 1:
-            tmp_list = models.Product.objects.exclude(product_type='test').order_by('-id')
+            tmp_list = models.Product.objects.exclude(id=5).order_by('-id')
         else:
             tmp_list = request.user.from_product.order_by('-id').all()
 
