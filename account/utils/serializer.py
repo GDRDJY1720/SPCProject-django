@@ -22,11 +22,11 @@ class LoginSerializer(serializers.Serializer):
         params = {}
         phone = re.match('^[1-9]{11}$', value)
         if phone is not None:
-            params['phonenum'] = value
+            params['phone_num'] = value
         else:
             email = re.match('^[a-zA-Z0-9]+([-_.][a-zA-Z0-9]+)*@[a-zA-Z0-9]+([-_.][a-zA-Z0-9]+)*\.[a-z]{2,}$', value)
             if email is not None:
-                params['useremail'] = value
+                params['user_email'] = value
             else:
                 params['username'] = value
 
@@ -49,7 +49,7 @@ class TokenSerializer(serializers.ModelSerializer):
         # depth = 1
 
     def get_privilege(self, row):
-        return row.user.from_privilege
+        return row.user.privilege
 
     def get_user_name(self, row):
         return row.user.username
@@ -62,5 +62,5 @@ class TokenSerializer(serializers.ModelSerializer):
 class UserSerialiser(serializers.ModelSerializer):
     class Meta:
         model = models.UserInfo
-        fields = ['username', 'useremail', 'phonenum', 'from_privilege', 'user_id', 'user_secret', 'from_product']
+        fields = ['username', 'user_email', 'phone_num', 'privilege', 'user_id', 'user_secret', 'fk_product']
         # depth = 1

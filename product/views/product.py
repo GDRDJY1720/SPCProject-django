@@ -32,21 +32,21 @@ class ProductView(GenericViewSet):
         new_product_list = []
         for product in product_list:
             new_product_list.append(product.get('ProductKey'))
-            models.Product.objects.update_or_create(productkey=product.get('ProductKey'),
+            models.Product.objects.update_or_create(product_key=product.get('ProductKey'),
                                                     defaults={
-                                                        'productname': product.get('ProductName')
+                                                        'product_name': product.get('ProductName')
                                                     })
 
-        local_product_list = models.Product.objects.values_list('productkey', flat=True)
+        local_product_list = models.Product.objects.values_list('product_key', flat=True)
         for lo in local_product_list:
             if lo not in new_product_list:
-                models.Product.objects.filter(productkey=lo).delete()
+                models.Product.objects.filter(product_key=lo).delete()
         # ============================> END <=======================================
 
-        if request.user.from_privilege == 1:
-            tmp_list = models.Product.objects.exclude(id=5).order_by('-id')
+        if request.user.fk_customer:
+            tmp_list = request.user.fk_product.order_by('-id').all()
         else:
-            tmp_list = request.user.from_product.order_by('-id').all()
+            tmp_list = models.Product.objects.exclude(id=5).order_by('-id')
 
         pager = self.paginate_queryset(tmp_list)
         ser = self.get_serializer(instance=pager, many=True, context={'request': request})
@@ -79,7 +79,7 @@ class ProductView(GenericViewSet):
 
         data = dic.get('Data')
 
-        models.Product.objects.create(productkey=data.get('ProductKey'), productname=data.get('ProductName'))
+        models.Product.objects.create(product_key=data.get('ProductKey'), product_name=data.get('ProductName'))
 
         return Response(res)
 
@@ -95,7 +95,7 @@ class ProductView(GenericViewSet):
             res['msg'] = '没有找到产品'
             return Response(res)
 
-        dic = self.get_APIRun(APIname='QueryProduct', res=res, ProductKey=product.productkey)
+        dic = self.get_APIRun(APIname='QueryProduct', res=res, ProductKey=product.product_key)
         if res['code'] != 1000:
             return Response(res)
 
@@ -109,7 +109,7 @@ class ProductView(GenericViewSet):
 
         product = models.Product.objects.filter(id=pk).first()
 
-        dic = self.get_APIRun(APIname='DeleteProduct', res=res, ProductKey=product.productkey)
+        dic = self.get_APIRun(APIname='DeleteProduct', res=res, ProductKey=product.product_key)
         if res['code'] != 1000:
             return Response(res)
 
@@ -127,7 +127,7 @@ class ProductView(GenericViewSet):
         product = models.Product.objects.filter(id=pk).first()
 
         dic = self.get_APIRun(APIname='UpdateProduct', res=res, ProductName=product_new_name,
-                              ProductKey=product.productkey, Description=description)
+                              ProductKey=product.product_key, Description=description)
         if res['code'] != 1000:
             return Response(res)
 

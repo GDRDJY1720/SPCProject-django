@@ -19,7 +19,7 @@ class LoginView(APIView):
         if ser.is_valid():
             user = ser.validated_data['username']
 
-            if user.password != account.md5(user.username, [ser.validated_data['password'], user.phonenum]):
+            if user.password != account.md5(user.username, [ser.validated_data['password'], user.phone_num]):
                 res['msg'] = '密码错误'
                 res['code'] = 1002
                 return Response(res)
@@ -29,7 +29,7 @@ class LoginView(APIView):
             token_obj = models.UserToken.objects.filter(user_id=user.id).first()
             if token_obj is None or now > token_obj.end_time:
                 time_out = now + datetime.timedelta(days=1)
-                m = account.md5(user.phonenum, stime)
+                m = account.md5(user.phone_num, stime)
                 token_obj, flag = models.UserToken.objects.update_or_create(user=user,
                                                                             defaults={'start_time': now,
                                                                                       'token': m,

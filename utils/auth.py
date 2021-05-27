@@ -25,4 +25,4 @@ class Authtiction(BaseAuthentication):
             res['msg'] = '登录超时，请重新登录'
             raise exceptions.AuthenticationFailed(res)
 
-        return token_obj.user, token_obj
+        return token_obj.fk_user, token_obj

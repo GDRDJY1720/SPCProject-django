@@ -17,12 +17,12 @@ class AlarmLogView(GenericViewSet):
 
     def list(self, request, *args, **kwargs):
         res = {'code': 1000, 'msg': ''}
-        if request.user.from_privilege == 1:
-            param = {}
-        else:
+        if request.user.fk_customer:
             uid = request.user.id
-            device_name_list = Dmodels.Device.objects.filter(from_user_id=uid).values_list('device_name', flat=True)
+            device_name_list = Dmodels.Device.objects.filter(fk_user_id=uid).values_list('device_name', flat=True)
             param = {'device_name__in': device_name_list}
+        else:
+            param = {}
 
         alarm_list = models.Alarm.objects.order_by('-alarm_status', '-id').filter(**param)
         page = self.paginate_queryset(alarm_list)
@@ -34,13 +34,13 @@ class AlarmLogView(GenericViewSet):
     def limit(self, request, *args, **kwargs):
         res = {'code': 1000, 'msg': ''}
 
-        if request.user.from_privilege == 1:
+        if request.user.fk_customer:
+            uid = request.user.id
+            device_name_list = Dmodels.Device.objects.filter(fk_user_id=uid).values_list('device_name', flat=True)
+            param = {'device_name__in': device_name_list}
+        else:
             device_name_list = []
             param = {}
-        else:
-            uid = request.user.id
-            device_name_list = Dmodels.Device.objects.filter(from_user_id=uid).values_list('device_name', flat=True)
-            param = {'device_name__in': device_name_list}
 
         sign = kwargs.get('sign', None)
         if sign == 'startTime':
@@ -85,7 +85,7 @@ class AlarmLogView(GenericViewSet):
                 res['msg'] = 'data参数缺失'
                 return Response(res)
 
-            if request.user.from_privilege != 1 and device_name not in device_name_list:
+            if request.user.fk_customer and device_name not in device_name_list:
                 res['code'] = 1051
                 res['msg'] = '无此设备，请检查是否输入正确'
                 return Response(res)
@@ -121,12 +121,12 @@ class RunLogView(GenericViewSet):
     def list(self, request, *args, **kwargs):
         res = {'code': 1000, 'msg': ''}
 
-        if request.user.from_privilege == 1:
-            param = {}
-        else:
+        if request.user.fk_customer:
             uid = request.user.id
-            device_name_list = Dmodels.Device.objects.filter(from_user_id=uid).values_list('device_name', flat=True)
+            device_name_list = Dmodels.Device.objects.filter(fk_user_id=uid).values_list('device_name', flat=True)
             param = {'device_name__in': device_name_list}
+        else:
+            param = {}
 
         run_log_list = models.Run.objects.filter(**param).order_by('-id')
 
@@ -140,13 +140,13 @@ class RunLogView(GenericViewSet):
     def limit(self, request, *args, **kwargs):
         res = {'code': 1000, 'msg': ''}
 
-        if request.user.from_privilege == 1:
+        if request.user.fk_customer:
+            uid = request.user.id
+            device_name_list = Dmodels.Device.objects.filter(fk_user_id=uid).values_list('device_name', flat=True)
+            param = {'device_name__in': device_name_list}
+        else:
             device_name_list = ''
             param = {}
-        else:
-            uid = request.user.id
-            device_name_list = Dmodels.Device.objects.filter(from_user_id=uid).values_list('device_name', flat=True)
-            param = {'device_name__in': device_name_list}
 
         sign = kwargs.get('sign', None)
         if sign == 'startTime':
@@ -191,7 +191,7 @@ class RunLogView(GenericViewSet):
                 res['msg'] = 'startTime或endTime参数缺失'
                 return Response(res)
 
-            if request.user.from_privilege != 1 and device_name not in device_name_list:
+            if request.user.fk_customer and device_name not in device_name_list:
                 res['code'] = 1051
                 res['msg'] = '无此设备，请检查是否输入正确'
                 return Response(res)

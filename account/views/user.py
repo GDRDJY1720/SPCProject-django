@@ -33,7 +33,8 @@ class UserView(GenericViewSet):
         res['data'] = ser.data
         return Response(res)
 
-    def create(self, request, *args, **kwargs):
+    @staticmethod
+    def create(request, *args, **kwargs):
         """
         数据库无法置唯一，只有创建的时候进行控制了
         :param request:
@@ -45,17 +46,17 @@ class UserView(GenericViewSet):
 
         stime = str(time.time())
         username = request.data.get('userName', None)
-        phonenum = request.data.get('phoneNum', None)
-        password = account.md5(username, [request.data.get('password', None), phonenum])
+        phone_num = request.data.get('phoneNum', None)
+        password = account.md5(username, [request.data.get('password', None), phone_num])
         user_id = account.md5('api' + username, stime)
         user_secret = account.md5(user_id, [password, stime])
 
         data = {
             'username': username,
             'password': password,
-            'useremail': request.data.get('userEmail', None),
-            'phonenum': phonenum,
-            'from_privilege': request.data.get('privilege', None),
+            'user_email': request.data.get('userEmail', None),
+            'phone_num': phone_num,
+            'privilege': request.data.get('privilege', None),
             'user_id': user_id,
             'user_secret': user_secret,
         }
@@ -73,7 +74,8 @@ class UserView(GenericViewSet):
             return Response(res)
         return Response(res)
 
-    def destroy(self, request, *args, **kwargs):
+    @staticmethod
+    def destroy(request, *args, **kwargs):
         res = {'code': 1000, 'msg': ''}
         pk = kwargs.get('pk', None)
         if pk == '1':
@@ -83,6 +85,7 @@ class UserView(GenericViewSet):
         models.UserInfo.objects.filter(id=pk).delete()
         return Response(res)
 
-    def update(self, request, *args, **kwargs):
+    @staticmethod
+    def update(request, *args, **kwargs):
         res = {'code': 1000, 'msg': '', 'data': []}
         return Response(res)

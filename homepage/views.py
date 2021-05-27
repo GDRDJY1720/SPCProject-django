@@ -24,10 +24,10 @@ class HomepageInfo(GenericAPIView, ali_api.APIRun):
 
     def get(self, request, *args, **kwargs):
         res = {'code': 1000, 'msg': '', 'data': []}
-        if request.user.from_privilege == 1:
-            param = {}
+        if request.user.fk_customer:
+            param = {'fk_user_id': request.user.id}
         else:
-            param = {'from_user_id': request.user.id}
+            param = {}
 
         device_list = Dmodels.Device.objects.filter(**param).order_by('-id')
         data = dict()
@@ -67,7 +67,7 @@ class HomepageInfo(GenericAPIView, ali_api.APIRun):
         device_table_pager = self.paginate_queryset(device_table)
 
         # 生成设备状态数据信息，将管理员和其他用户分开，管理员直接调用API，其他人员使用对比获取
-        if request.user.from_privilege == 1:
+        if request.user.fk_customer is None:
             dic = self.get_api_run(res=res, api_name='QueryDeviceStatistics')
             if res['code'] != 1000:
                 return Response(res)
@@ -109,10 +109,10 @@ class HomepageInfo(GenericAPIView, ali_api.APIRun):
         today = datetime.datetime.fromtimestamp(time.mktime(datetime.date.today().timetuple()))
         yesterday = today - datetime.timedelta(days=1)
         # 管理员的时候就是全部搜索，不需要使用deviceName进行限制
-        if request.user.from_privilege == 1:
-            log_params = {}
-        else:
+        if request.user.fk_customer:
             log_params = {'device_name__in': device_name}
+        else:
+            log_params = {}
 
         run_log_list = Lmodels.Run.objects.filter(run_starttime__gte=yesterday,
                                                   run_endtime__lte=today,
@@ -166,10 +166,10 @@ class HomepageInfoTable(GenericAPIView, ali_api.APIRun):
     def get(self, request, *args, **kwargs):
         res = {'code': 1000, 'msg': ''}
 
-        if request.user.from_privilege == 1:
-            param = {}
+        if request.user.fk_customer:
+            param = {'fk_user_id': request.user.id}
         else:
-            param = {'from_user_id': request.user.id}
+            param = {}
 
         device_list = Dmodels.Device.objects.filter(**param).order_by('-id')
 
@@ -208,10 +208,10 @@ class HomepageMap(APIView, ali_api.APIRun):
 
     def get(self, request, *args, **kwargs):
         res = {'code': 1000, 'msg': '', 'data': []}
-        if request.user.from_privilege == 1:
-            param = {'device_type': 2}
+        if request.user.fk_customer:
+            param = {'fk_user_id': request.user.id, 'device_type': 2}
         else:
-            param = {'from_user_id': request.user.id, 'device_type': 2}
+            param = {'device_type': 2}
 
         device_list = Dmodels.Device.objects.filter(**param)
         for device in device_list:
@@ -262,7 +262,7 @@ class HomepageDataV(GenericAPIView, ali_api.APIRun):
 
         # 3、地图销量展示
         map_list = Dmodels.Device.objects.filter(device_type=2).exclude(actual_device_secret=None).values(
-            'deviceProvince').annotate(count=Dmodels.models.Count('deviceProvince'))
+            'device_province').annotate(count=Dmodels.models.Count('device_province'))
         # device_ser = serializer.DeviceMapSerializer(instance=device_list, many=True)
         data['map'] = map_list
 

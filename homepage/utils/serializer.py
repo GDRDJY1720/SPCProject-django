@@ -12,10 +12,10 @@ class ProductCountSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Pmodels.Product
-        fields = ['id', 'productname', 'count']
+        fields = ['id', 'product_name', 'count']
 
     def get_count(self, row):
-        return Dmodels.Device.objects.filter(from_product_id=row.id).count()
+        return Dmodels.Device.objects.filter(fk_product_id=row.id).count()
 
 
 class AlarmLogSerializer(serializers.ModelSerializer):
@@ -35,7 +35,7 @@ class AlarmLogSerializer(serializers.ModelSerializer):
 
     def get_servoName(self, row):
         device = Dmodels.Device.objects.filter(device_name=row.device_name).first()
-        servo_num = device.from_product.product_servo_num
+        servo_num = device.fk_product.product_servo_num
         if servo_num == 2:
             tmp = ['弯曲伺服', '牵引伺服']
         elif servo_num == 3:

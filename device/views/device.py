@@ -25,7 +25,7 @@ class DeviceInfoView(GenericViewSet):
     def list(self, request, *args, **kwargs):
         res = {'code': 1000, 'msg': ''}
 
-        if request.user.from_privilege == 1:
+        if request.user.privilege == 1:
             # 将数据对接放到管理员里面可以有效提高其他用户的访问速度
             # 但是如果是手动在物联网平台添加，没有管理员进行更新就不会产生新数据 （21-04-30）
             # ========================> 将物联网平台中的数据拷贝 <=====================
@@ -33,7 +33,7 @@ class DeviceInfoView(GenericViewSet):
             # 与物联网平台中的数据对应
             for product in product_list:
                 # 现在设备数量较少，当数据量多的时候需要多次调用接口来进行数据的对应
-                dic = self.get_APIRun(res=res, APIname='QueryDevice', ProductKey=product.productkey, PageSize=50)
+                dic = self.get_APIRun(res=res, APIname='QueryDevice', ProductKey=product.product_key, PageSize=50)
                 if res['code'] != 1000:
                     return Response(res)
 
@@ -47,16 +47,18 @@ class DeviceInfoView(GenericViewSet):
                         models.Device.objects.update_or_create(device_name=data.get('DeviceName'),
                                                                defaults={
                                                                    'iot_id': data.get('IotId'),
-                                                                   'from_product_id': product.id,
+                                                                   'fk_product_id': product.id,
                                                                    # 'device_type': 1,
                                                                    'device_secret': data.get('DeviceSecret')
                                                                })
             # ========================> END <==============================================
             param = {}
+        elif request.user.fk_customer:
+            param = {'fk_user_id': request.user.id}
         else:
-            param = {'from_user_id': request.user.id}
+            param = {}
         # 查询数据库中的数据传入到前端
-        iot_list = models.Device.objects.exclude(from_product__product_type='test').filter(**param).order_by('-id').values_list(
+        iot_list = models.Device.objects.exclude(fk_product__product_type='test').filter(**param).order_by('-id').values_list(
             'iot_id', flat=True)
         if not iot_list:
             res['data'] = []
@@ -70,7 +72,7 @@ class DeviceInfoView(GenericViewSet):
 
         status_list = state_dic.get('DeviceStatusList').get('DeviceStatus')
         # 可以使用下面的方式将代码优化，但是不确定是不是只查询一次数据库
-        # print(models.Device.objects.exclude(from_product__product_type='test').order_by('id'))
+        # print(models.Device.objects.exclude(fk_product__product_type='test').order_by('id'))
         de_list = models.Device.objects.filter(iot_id__in=pager).order_by('-id')
         ser = self.get_serializer(instance=de_list, many=True, context={'request': request, 'data': status_list})
 
@@ -80,10 +82,10 @@ class DeviceInfoView(GenericViewSet):
 
     def list_limit(self, request, *args, **kwargs):
         res = {'code': 1000, 'msg': '', 'data': []}
-        if request.user.from_privilege == 1:
-            param = {}
+        if request.user.fk_customer:
+            param = {'fk_user_id': request.user.id}
         else:
-            param = {'from_user_id': request.user.id}
+            param = {}
 
         sign = kwargs.get('pk', None)
         if sign == 'deviceName' or sign == 'id':
@@ -106,7 +108,7 @@ class DeviceInfoView(GenericViewSet):
                 res['msg'] = 'productID参数缺失'
                 return Response(res)
 
-            param['from_product_id'] = product_id
+            param['fk_product_id'] = product_id
             device_list = models.Device.objects.filter(**param).order_by('-id')
 
         elif sign == 'deviceSecret':
@@ -130,21 +132,6 @@ class DeviceInfoView(GenericViewSet):
             device_list = models.Device.objects.filter(**param).order_by('-id')
 
         # 状态的筛选涉及到多次循环调用接口进行选择，同时也涉及到用户权限的问题，较为复杂，后续如有好方法再加
-        # elif sign == 'status':
-        #     status = request.query_params.get('data', None)
-        #     if status is None:
-        #         res['code'] = 1050
-        #         res['msg'] = 'status参数缺失'
-        #         return Response(res)
-        #
-        #     if request.user.from_privilege != 3:
-        #         product_key_list = request.user.from_product.all().values_list('productkey', flat=True)
-        #         for p in product_key_list:
-        #             dic = self.get_APIRun(res=res, APIname='QueryDeviceByStatus',
-        #                                   ProductKey=p, Status=status, CurrentPage=1, PageSize=10)
-        #             if res['code'] != 1000:
-        #                 return Response(res)
-        #     print(request.user.from_product.all().values_list('productkey', flat=True))
 
         else:
             res['code'] = 1050
@@ -186,7 +173,7 @@ class DeviceInfoView(GenericViewSet):
         product = Pmodels.Product.objects.filter(id=product_id).first()
         device_name = 'GUTE_' + product.product_identifier + '_' + str(time.time()) + '_' + str(request.user.id)
 
-        dic = self.get_APIRun(res=res, APIname='RegisterDevice', ProductKey=product.productkey,
+        dic = self.get_APIRun(res=res, APIname='RegisterDevice', ProductKey=product.product_key,
                               Nickname=nick_name, DeviceName=device_name)
         if res['code'] != 1000:
             return Response(res)
@@ -197,7 +184,7 @@ class DeviceInfoView(GenericViewSet):
                                                    device_name=data['DeviceName'],
                                                    device_secret=data['DeviceSecret'],
                                                    iot_id=data.get('IotId'),
-                                                   from_product_id=product_id,
+                                                   fk_product_id=product_id,
                                                    device_type=2)
         except Exception as e:
             res['code'] = 1011
@@ -205,9 +192,9 @@ class DeviceInfoView(GenericViewSet):
             return Response(res)
 
         # try:
-        #     pro = request.user.from_product.filter(id=product_id, userinfo=request.user).first()
+        #     pro = request.user.fk_product.filter(id=product_id, userinfo=request.user).first()
         #     if not pro:
-        #         request.user.from_product.add(product)
+        #         request.user.fk_product.add(product)
         # except Exception as e:
         #     res['code'] = 1012
         #     res['msg'] = 'ManyToMany SQL异常 %s' % e
@@ -229,8 +216,8 @@ class DeviceInfoView(GenericViewSet):
             res['msg'] = 'device 不存在'
             return Response(res)
 
-        old_user_id = device.from_user_id
-        old_product_id = device.from_product_id
+        old_user_id = device.fk_user_id
+        old_product_id = device.fk_product_id
         nick_name = request.data.get('nickName', None)
         user_id = request.data.get('userId', None)
         device_secret = request.data.get('deviceSecret', None)
@@ -251,7 +238,7 @@ class DeviceInfoView(GenericViewSet):
             dic['nick_name'] = nick_name
 
         if user_id:
-            dic['from_user_id'] = user_id
+            dic['fk_user_id'] = user_id
 
         if device_secret:
             dic['actual_device_secret'] = device_secret
@@ -266,17 +253,17 @@ class DeviceInfoView(GenericViewSet):
             res['msg'] = '数据有重复'
             return Response(res)
 
-        if user_id != device.from_user_id:
-            i = models.Device.objects.filter(from_user_id=device.from_user_id,
-                                             from_product_id=device.from_product_id).first()
+        if user_id != device.fk_user_id:
+            i = models.Device.objects.filter(fk_user_id=device.fk_user_id,
+                                             fk_product_id=device.fk_product_id).first()
             if not i:
                 u = Umodels.UserInfo.objects.filter(id=old_user_id).first()
                 if u:
-                    u.from_product.remove(old_product_id)
+                    u.fk_product.remove(old_product_id)
 
         try:
             u = Umodels.UserInfo.objects.filter(id=user_id).first()
-            u.from_product.add(old_product_id)
+            u.fk_product.add(old_product_id)
         except Exception as e:
             pass
 
@@ -293,8 +280,8 @@ class DeviceInfoView(GenericViewSet):
             res['msg'] = '设备不存在'
             return Response(res)
 
-        old_user_id = device.from_user_id
-        old_product_id = device.from_product_id
+        old_user_id = device.fk_user_id
+        old_product_id = device.fk_product_id
 
         self.get_APIRun(res=res, APIname='DeleteDevice', IotId=device.iot_id)
         if res['code'] != 1000:
@@ -302,10 +289,10 @@ class DeviceInfoView(GenericViewSet):
 
         device.delete()
 
-        i = models.Device.objects.filter(from_user_id=old_user_id, from_product_id=old_product_id).first()
+        i = models.Device.objects.filter(fk_user_id=old_user_id, fk_product_id=old_product_id).first()
         if not i:
             u = Umodels.UserInfo.objects.filter(id=old_user_id).first()
-            u.from_product.remove(old_product_id)
+            u.fk_product.remove(old_product_id)
 
         return Response(res)
 
@@ -318,8 +305,8 @@ class DeviceInfoView(GenericViewSet):
         device_id = kwargs.get('pk', None)
         device = models.Device.objects.filter(id=device_id).first()
 
-        old_user_id = device.from_user_id
-        old_product_id = device.from_product_id
+        old_user_id = device.fk_user_id
+        old_product_id = device.fk_product_id
 
         sign = request.data.get('sign', None)
         if sign is None:
@@ -327,8 +314,7 @@ class DeviceInfoView(GenericViewSet):
             res['msg'] = '请求参数sign失缺'
             return Response(res)
 
-        tmp = {}
-        tmp[sign] = request.data.get('data', None)
+        tmp = {sign: request.data.get('data', None)}
         if tmp[sign] is None:
             res['code'] = 1050
             res['msg'] = '请求参数data缺失'
@@ -343,7 +329,7 @@ class DeviceInfoView(GenericViewSet):
             self.get_APIRun(res, 'BatchUpdateDeviceNickname', DeviceObjList=[t, ])
             if res['code'] != 1000:
                 return Response(res)
-        elif request.user.from_privilege == 3:
+        elif request.user.fk_customer:
             res['code'] = 1006
             res['msg'] = '无更新权限'
             return Response(res)
@@ -356,18 +342,18 @@ class DeviceInfoView(GenericViewSet):
             res['msg'] = '数据有重复'
             return Response(res)
 
-        if sign == 'from_user_id':
-            if tmp[sign] != device.from_user_id:
-                i = models.Device.objects.filter(from_user_id=device.from_user_id,
-                                                 from_product_id=device.from_product_id).first()
+        if sign == 'fk_user_id':
+            if tmp[sign] != device.fk_user_id:
+                i = models.Device.objects.filter(fk_user_id=device.fk_user_id,
+                                                 fk_product_id=device.fk_product_id).first()
                 if not i:
                     u = Umodels.UserInfo.objects.filter(id=old_user_id).first()
                     if u:
-                        u.from_product.remove(old_product_id)
+                        u.fk_product.remove(old_product_id)
 
             try:
                 u = Umodels.UserInfo.objects.filter(id=tmp[sign]).first()
-                u.from_product.add(old_product_id)
+                u.fk_product.add(old_product_id)
             except Exception as e:
                 pass
 
@@ -408,10 +394,10 @@ class DeviceDataView(GenericViewSet, ali_api.APIRun):
             res['msg'] = 'productID参数缺失'
             return Response(res)
 
-        if request.user.from_privilege == 1:
-            param = {'from_product_id': product_id}
+        if request.user.fk_customer:
+            param = {'fk_user_id': request.user.id, 'fk_product_id': product_id}
         else:
-            param = {'from_user_id': request.user.id, 'from_product_id': product_id}
+            param = {'fk_product_id': product_id}
 
         device_list = models.Device.objects.filter(**param).order_by('-id')
         iot_id_list = device_list.values_list('iot_id', flat=True)
@@ -470,7 +456,7 @@ class DeviceLockView(GenericViewSet, ali_api.APIRun):
             if res['code'] != 1000:
                 return Response(res)
 
-            models.Device.objects.filter(**params).update(deviceOnLock=True)
+            models.Device.objects.filter(**params).update(device_lock=True)
 
         else:
             items = '{"DeviceOnLock":0}'
@@ -480,7 +466,7 @@ class DeviceLockView(GenericViewSet, ali_api.APIRun):
             if res['code'] != 1000:
                 return Response(res)
 
-            models.Device.objects.filter(**params).update(deviceOnLock=False)
+            models.Device.objects.filter(**params).update(device_lock=False)
 
         return Response(res)
 

@@ -27,24 +27,24 @@ class PropertyInfoView(GenericViewSet, ali_api.APIRun):
 
         device = models.Device.objects.filter(id=pk).first()
 
-        dic = self.get_api_run(api_name='QueryThingModel', res=res, ProductKey=device.from_product.productkey)
+        dic = self.get_api_run(api_name='QueryThingModel', res=res, ProductKey=device.fk_product.productkey)
         if res['code'] != 1000:
             return Response(res)
 
-        if not device.from_product.product_servo_num:
-            servo_dic = self.get_api_run(api_name='ListProductTags', res=res, ProductKey=device.from_product.productkey)
+        if not device.fk_product.product_servo_num:
+            servo_dic = self.get_api_run(api_name='ListProductTags', res=res, ProductKey=device.fk_product.productkey)
             if res['code'] != 1000:
                 return Response(res)
 
             try:
                 servo_num = int(servo_dic.get('Data').get('ProductTag')[0].get('TagValue'))
-                Pmodels.Product.objects.filter(id=device.from_product_id).update(product_servo_num=servo_num)
+                Pmodels.Product.objects.filter(id=device.fk_product_id).update(product_servo_num=servo_num)
             except Exception:
                 res['code'] = 1015
                 res['msg'] = '伺服数量未设置，无法查询对应属性'
                 return Response(res)
         else:
-            servo_num = int(device.from_product.product_servo_num)
+            servo_num = int(device.fk_product.product_servo_num)
 
         data = self.get_property_info(data=json.loads(dic.get('Data').get('ThingModelJson')), servo_num=servo_num)
         ser = self.get_serializer(instance=device, context={'request': request, 'data': data, 'servo_num': servo_num})
@@ -110,7 +110,7 @@ class PropertyInfoView(GenericViewSet, ali_api.APIRun):
                                        Asc=0,
                                        EndTime=endtime,
                                        PageSize=page_size,
-                                       ProductKey=device.from_product.productkey,
+                                       ProductKey=device.fk_product.product_key,
                                        DeviceName=device.device_name)
                 if res['code'] != 1000:
                     return Response(res)
@@ -123,7 +123,7 @@ class PropertyInfoView(GenericViewSet, ali_api.APIRun):
                                    Asc=0,
                                    EndTime=endtime,
                                    PageSize=page_size,
-                                   ProductKey=device.from_product.productkey,
+                                   ProductKey=device.fk_product.product_key,
                                    DeviceName=device.device_name)
             if res['code'] != 1000:
                 return Response(res)
@@ -209,7 +209,7 @@ class SetPropertyView(GenericViewSet, ali_api.APIRun):
             return Response(res)
 
         self.get_api_run(res=res, api_name='SetDevicesProperty', Items=items,
-                         ProductKey=device_obj.from_product.productkey,
+                         ProductKey=device_obj.fk_product.product_key,
                          DeviceNameList=[device_obj.device_name, ])
         if res['code'] != 1000:
             return Response(res)

@@ -8,26 +8,21 @@ from rest_framework import serializers
 
 
 class DeviceSerializer(serializers.ModelSerializer):
-    from_user = serializers.SerializerMethodField()  # 自定义显示
-    # from_user = serializers.CharField(source="from_user.username")
+    fk_user = serializers.SerializerMethodField()  # 自定义显示
     status = serializers.SerializerMethodField()
     fk_sales = serializers.SerializerMethodField()
-    # customer_code = serializers.SerializerMethodField()
-    # sell_code = serializers.SerializerMethodField()
-    # sell_site = serializers.SerializerMethodField()
-    # sell_time = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Device
         fields = '__all__'
         # exclude = ["fk_sales"]
-        # fields = ['id', 'nick_name', 'from_product', 'from_user']
+        # fields = ['id', 'nick_name', 'fk_product', 'fk_user']
         # fields = ['id', 'device_name']
         depth = 1
 
-    def get_from_user(self, row):
+    def get_fk_user(self, row):
         # try:
-        #     ret = row.from_user.username
+        #     ret = row.fk_user.username
         # except Exception:
         #     ret = None
         # return ret
@@ -75,7 +70,7 @@ class DeviceSerializer(serializers.ModelSerializer):
 
 
 class PropertySerializer(serializers.ModelSerializer):
-    product_name = serializers.CharField(source='from_product.productname')
+    product_name = serializers.CharField(source='fk_product.product_name')
     servo_count = serializers.SerializerMethodField()
     servo_info = serializers.SerializerMethodField()
 
@@ -99,7 +94,7 @@ class SetPropertySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Pmodels.Product
-        fields = ['id', 'productkey', 'properties']
+        fields = ['id', 'product_key', 'properties']
 
     def get_properties(self, row):
         tmp_dic = self.context.get('data')

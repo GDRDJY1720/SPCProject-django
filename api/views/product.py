@@ -15,10 +15,7 @@ class QueryProductListView(GenericAPIView):
     def post(self, request, *args, **kwargs):
         res = {'code': 1000, 'msg': '', 'data': []}
 
-        if request.user.from_privilege == 1:
-            product_list = Pmodels.Product.objects.order_by('id').all()
-        else:
-            product_list = request.user.from_product.all().order_by('id')
+        product_list = request.user.fk_product.all().order_by('id')
 
         pager = self.paginate_queryset(product_list)
         ser = self.get_serializer(instance=pager, many=True)

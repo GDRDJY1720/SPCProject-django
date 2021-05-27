@@ -19,10 +19,10 @@ class QueryDeviceListView(GenericAPIView, ali_api.APIRun):
     def post(self, request, *args, **kwargs):
         res = {'code': 1000, 'msg': '', 'data': []}
 
-        if request.user.from_privilege == 1:
-            param = {}
+        if request.user.fk_customer:
+            param = {'fk_user_id': request.user.id}
         else:
-            param = {'from_user_id': request.user.id}
+            param = {}
 
         iot_list = Dmodels.Device.objects.filter(**param).order_by('id').values_list('iot_id', flat=True)
         if not iot_list:

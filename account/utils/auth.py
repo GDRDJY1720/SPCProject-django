@@ -23,4 +23,4 @@ class UserCreateAuth(BaseAuthentication):
             res['msg'] = '用户验证失败'
             raise exceptions.AuthenticationFailed(res)
 
-        return token_obj.user, token_obj
+        return token_obj.fk_user, token_obj

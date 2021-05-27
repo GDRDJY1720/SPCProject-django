@@ -21,7 +21,7 @@ class AlarmSerialiser(serializers.ModelSerializer):
 
     def get_from_servo(self, row):
         device = Dmodels.Device.objects.filter(device_name=row.device_name).first()
-        servo_num = device.from_product.product_servo_num
+        servo_num = device.fk_product.product_servo_num
         if servo_num == 2:
             tmp = ['弯曲伺服', '牵引伺服']
         elif servo_num == 3:

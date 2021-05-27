@@ -31,10 +31,10 @@ class QueryDeviceListSerializer(serializers.ModelSerializer):
         fields = ['actual_device_secret', 'product_name', 'product_key', 'status']
 
     def get_product_name(self, row):
-        return row.from_product.productname
+        return row.fk_product.product_name
 
     def get_product_key(self, row):
-        return row.from_product.productkey
+        return row.fk_product.product_key
 
     def get_status(self, row):
         for s in self.context.get('status'):
@@ -51,4 +51,4 @@ class SetPropertiesSerializer(serializers.ModelSerializer):
 class QueryProductListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pmodels.Product
-        fields = ['productname', 'productkey']
+        fields = ['product_name', 'product_key']

@@ -24,13 +24,13 @@ class TaskSubmitView(GenericAPIView):
 
         task = models.Task.objects.filter(fk_device__device_name=device_name).first()
 
-        url = task.taskSubmitUrl
+        url = task.task_submit_url
         data = {
-            'taskId': task.taskId,
+            'task_id': task.task_id,
             'taskStatus': task_status
         }
-        task_info = json.loads(task.taskInfo)
-        task_data = json.loads(task.taskSubmitInfo)
+        task_info = json.loads(task.task_info)
+        task_data = json.loads(task.task_submit_info)
         for i in task_data:
             data[i] = task_info[i]
 

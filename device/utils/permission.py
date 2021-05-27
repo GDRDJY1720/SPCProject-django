@@ -8,7 +8,7 @@ class SVIPPermission(BasePermission):
 
     def has_permission(self, request, view):
         if request.method == 'POST' or request.method == 'DELETE' or request.method == 'PUT':
-            if request.user.from_privilege != 1:
+            if request.user.privilege != 1:
                 return False
 
         return True

@@ -25,7 +25,7 @@ class GetTokenView(APIView):
             token_obj = Umodels.UserToken.objects.filter(user_id=user.id).first()
             if token_obj is None or now > token_obj.end_time:
                 time_out = now + datetime.timedelta(days=1)
-                m = account.md5(user.phonenum, stime)
+                m = account.md5(user.phone_num, stime)
                 Umodels.UserToken.objects.update_or_create(user=user,
                                                            defaults={'start_time': now,
                                                                      'token': m,

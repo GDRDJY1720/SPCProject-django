@@ -29,18 +29,18 @@ class QueryPropertyListView(GenericAPIView, ali_api.APIRun):
             return Response(res)
 
         # device = Dmodels.Device.objects.filter(actual_device_secret=device_secret).first()
-        product = Pmodels.Product.objects.filter(productkey=product_key).first()
+        product = Pmodels.Product.objects.filter(product_key=product_key).first()
         if not product:
             res['code'] = 1051
             res['msg'] = '产品不存在，请检查productKey是否正确'
             return Response(res)
-        dic = self.get_api_run(api_name='QueryThingModel', res=res, ProductKey=product.productkey)
+        dic = self.get_api_run(api_name='QueryThingModel', res=res, ProductKey=product.product_key)
         if res['code'] != 1000:
             return Response(res)
 
         res['data'] = {
-            'productName': product.productname,
-            'productKey': product.productkey,
+            'productName': product.product_name,
+            'productKey': product.product_key,
             'properties': self.get_property_info(json.loads(dic.get('Data').get('ThingModelJson')))
         }
         return Response(res)
@@ -174,18 +174,18 @@ class SetTaskView(GenericAPIView, ali_api.APIRun):
 
         # 添加任务的提交地址以及提交信息字段，同时在任务信息有下发请求的时候，存储任务编号，任务其他信息等基本任务信息 5-10
         if task_id:
-            params['taskId'] = task_id
+            params['task_id'] = task_id
 
         if task_info:
-            params['taskInfo'] = json.dumps(task_info)
-            # params['taskInfo'] = task_info
-            print(params['taskInfo'], type(params['taskInfo']))
+            params['task_info'] = json.dumps(task_info)
+            # params['task_info'] = task_info
+            print(params['task_info'], type(params['task_info']))
 
         if task_submit_url:
-            params['taskSubmitUrl'] = task_submit_url
+            params['task_submit_url'] = task_submit_url
 
         if task_submit_info:
-            params['taskSubmitInfo'] = json.dumps(task_submit_info)
+            params['task_submit_info'] = json.dumps(task_submit_info)
 
         if task_info or task_id or task_submit_url:
             try:
@@ -197,7 +197,7 @@ class SetTaskView(GenericAPIView, ali_api.APIRun):
                 return Response(res)
 
         # 下发任务信息
-        self.get_api_run(res=res, api_name='SetDevicesProperty', Items=items, ProductKey=device.from_product.productkey,
+        self.get_api_run(res=res, api_name='SetDevicesProperty', Items=items, ProductKey=device.fk_product.product_key,
                          DeviceNameList=[device.device_name, ])
         if res['code'] != 1000:
             return Response(res)
