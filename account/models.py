@@ -10,7 +10,7 @@ class UserInfo(models.Model):
         (3, '客户')
     )
 
-    username = models.CharField(max_length=15, unique=True)
+    username = models.CharField(max_length=15)
     # 密码加密是username+password+phonenum
     # 后续需要考虑忘记密码的时候如何找回密码
     password = models.CharField(max_length=32)

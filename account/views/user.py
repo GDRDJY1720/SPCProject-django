@@ -34,6 +34,13 @@ class UserView(GenericViewSet):
         return Response(res)
 
     def create(self, request, *args, **kwargs):
+        """
+        数据库无法置唯一，只有创建的时候进行控制了
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
         res = {'code': 1000, 'msg': ''}
 
         stime = str(time.time())

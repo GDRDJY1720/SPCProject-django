@@ -21,6 +21,7 @@ urlpatterns = [
     path('spc/device/', include('device.urls')),
     path('spc/product/', include('product.urls')),
     path('spc/log/', include('log.urls')),
+    path('spc/sale/', include('sale.urls')),
     # path('file/', include('Data.urls')),
 
     path('spc/wx/', include('weixin.urls')),

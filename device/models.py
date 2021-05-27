@@ -10,6 +10,7 @@ class Device(models.Model):
     iot_id = models.CharField(max_length=64, unique=True)
     from_product = models.ForeignKey(to='product.Product', on_delete=models.CASCADE)
     from_user = models.ForeignKey(to='account.UserInfo', on_delete=models.DO_NOTHING, default=1, null=True)
+    fk_sales = models.ForeignKey(to='sale.SalesInfo', on_delete=models.SET_NULL, null=True)
     actual_device_secret = models.CharField('设备序列号', max_length=32, null=True, unique=True)
     module_secret = models.CharField(max_length=32, null=True, unique=True)
     deviceOnLock = models.BooleanField(default=False)
@@ -19,4 +20,6 @@ class Device(models.Model):
     deviceProvince = models.CharField(max_length=6, default='四川')
     device_TotalRunTime = models.IntegerField(default=0)
     device_TotalOutput = models.IntegerField(default=0)
+
+
 

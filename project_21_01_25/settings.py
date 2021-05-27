@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'api',
     'homepage',
     'log',
-    'weixin'
+    'weixin',
+    'sale'
 ]
 
 MIDDLEWARE = [
