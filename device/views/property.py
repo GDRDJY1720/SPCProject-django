@@ -27,12 +27,12 @@ class PropertyInfoView(GenericViewSet, ali_api.APIRun):
 
         device = models.Device.objects.filter(id=pk).first()
 
-        dic = self.get_api_run(api_name='QueryThingModel', res=res, ProductKey=device.fk_product.productkey)
+        dic = self.get_api_run(api_name='QueryThingModel', res=res, ProductKey=device.fk_product.product_key)
         if res['code'] != 1000:
             return Response(res)
 
         if not device.fk_product.product_servo_num:
-            servo_dic = self.get_api_run(api_name='ListProductTags', res=res, ProductKey=device.fk_product.productkey)
+            servo_dic = self.get_api_run(api_name='ListProductTags', res=res, ProductKey=device.fk_product.product_key)
             if res['code'] != 1000:
                 return Response(res)
 
@@ -185,7 +185,7 @@ class SetPropertyView(GenericViewSet, ali_api.APIRun):
         print(product_id)
 
         product_obj = Pmodels.Product.objects.filter(id=product_id).first()
-        dic = self.get_api_run(api_name='QueryThingModel', res=res, ProductKey=product_obj.productkey)
+        dic = self.get_api_run(api_name='QueryThingModel', res=res, ProductKey=product_obj.product_key)
         if res['code'] != 1000:
             return Response(res)
 

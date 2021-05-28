@@ -7,6 +7,7 @@ from device import models
 from device.utils.permission import SVIPPermission
 from device.utils.serializer import DeviceSerializer
 from utils.pagination import CommonPagination
+from sale import models as Smodels
 from product import models as Pmodels
 from account import models as Umodels
 
@@ -99,7 +100,6 @@ class DeviceInfoView(GenericViewSet):
                 sign = 'device_name'
 
             param[sign] = data
-            device_list = models.Device.objects.filter(**param).order_by('-id')
 
         elif sign == 'productID':
             product_id = request.query_params.get('data', None)
@@ -109,7 +109,6 @@ class DeviceInfoView(GenericViewSet):
                 return Response(res)
 
             param['fk_product_id'] = product_id
-            device_list = models.Device.objects.filter(**param).order_by('-id')
 
         elif sign == 'deviceSecret':
             device_secret = request.query_params.get('data', None)
@@ -119,7 +118,6 @@ class DeviceInfoView(GenericViewSet):
                 return Response(res)
 
             param['actual_device_secret'] = device_secret
-            device_list = models.Device.objects.filter(**param).order_by('-id')
 
         elif sign == 'moduleSecret':
             module_secret = request.query_params.get('data', None)
@@ -129,7 +127,21 @@ class DeviceInfoView(GenericViewSet):
                 return Response(res)
 
             param['module_secret'] = module_secret
-            device_list = models.Device.objects.filter(**param).order_by('-id')
+
+        elif sign == 'customerCode':
+            customer_code = request.query_params.get('data', None)
+            if customer_code is None:
+                res['code'] = 1050
+                res['msg'] = 'customerCode参数缺失'
+                return Response(res)
+
+            sale_obj = Smodels.SalesInfo.objects.filter(customer_code=customer_code).first()
+            if sale_obj is None:
+                res['data'] = []
+                res['count'] = 0
+                return Response(res)
+
+            param['fk_sales'] = sale_obj
 
         # 状态的筛选涉及到多次循环调用接口进行选择，同时也涉及到用户权限的问题，较为复杂，后续如有好方法再加
 
@@ -137,6 +149,8 @@ class DeviceInfoView(GenericViewSet):
             res['code'] = 1050
             res['msg'] = 'sign参数为无效值'
             return Response(res)
+
+        device_list = models.Device.objects.filter(**param).order_by('-id')
 
         if not len(device_list):
             res['code'] = 1010
