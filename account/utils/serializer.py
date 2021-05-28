@@ -46,7 +46,7 @@ class TokenSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.UserToken
-        fields = ['token', 'privilege', 'user_name', 'end_time']
+        fields = ['token', 'privilege', 'user_name', 'end_time', 'customer']
         # depth = 1
 
     def get_privilege(self, row):
@@ -60,7 +60,7 @@ class TokenSerializer(serializers.ModelSerializer):
         return round(time.mktime(row.end_time.timetuple()) * 1000)
 
     def get_customer(self, row):
-        if row.fk_customer is None:
+        if row.fk_user.fk_customer is None:
             return 100
         return 1
 
