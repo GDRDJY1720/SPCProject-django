@@ -68,5 +68,5 @@ class TokenSerializer(serializers.ModelSerializer):
 class UserSerialiser(serializers.ModelSerializer):
     class Meta:
         model = models.UserInfo
-        fields = ['username', 'user_email', 'phone_num', 'privilege', 'user_id', 'user_secret', 'fk_product']
+        fields = ['id', 'username', 'user_email', 'phone_num', 'privilege', 'user_id', 'user_secret', 'fk_product']
         # depth = 1

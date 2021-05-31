@@ -128,6 +128,15 @@ class DeviceInfoView(GenericViewSet):
 
             param['module_secret'] = module_secret
 
+        elif sign == 'HMISecret':
+            hmi_secret = request.query_params.get('data', None)
+            if hmi_secret is None:
+                res['code'] = 1050
+                res['msg'] = 'HMISecret参数缺失'
+                return Response(res)
+
+            param['hmi_secret'] = hmi_secret
+
         elif sign == 'customerCode':
             customer_code = request.query_params.get('data', None)
             if customer_code is None:
