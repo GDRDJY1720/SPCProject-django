@@ -47,6 +47,7 @@ class PropertyInfoView(GenericViewSet, ali_api.APIRun):
             servo_num = int(device.fk_product.product_servo_num)
 
         data = self.get_property_info(data=json.loads(dic.get('Data').get('ThingModelJson')), servo_num=servo_num)
+        print(data)
         ser = self.get_serializer(instance=device, context={'request': request, 'data': data, 'servo_num': servo_num})
 
         res['data'] = ser.data
@@ -144,6 +145,8 @@ class PropertyInfoView(GenericViewSet, ali_api.APIRun):
         result = {}
 
         tmp_data = data.get('properties')
+        import pprint
+        pprint.pprint(data)
 
         for i in range(1, servo_num + 1):
             identifier_list = [j + '_' + str(i) for j in tmp]

@@ -1,6 +1,7 @@
 # _*_ coding:utf-8 _*_
 
 from rest_framework import serializers
+from commonTool import tool
 from log import models
 from device import models as Dmodels
 
@@ -21,17 +22,18 @@ class AlarmSerialiser(serializers.ModelSerializer):
 
     def get_from_servo(self, row):
         device = Dmodels.Device.objects.filter(device_name=row.device_name).first()
-        servo_num = device.fk_product.product_servo_num
-        if servo_num == 2:
-            tmp = ['弯曲伺服', '牵引伺服']
-        elif servo_num == 3:
-            tmp = ['弯曲伺服', '牵引伺服', '回送伺服']
-        elif servo_num == 4:
-            tmp = ['左移动伺服', '左弯曲伺服', '右移动伺服', '右弯曲伺服']
-        else:
-            return row.from_servo
+        tmp = tool.servo_name(device.fk_product.product_type)
+        # servo_num = device.fk_product.product_servo_num
+        # if servo_num == 2:
+        #     tmp = ['弯曲伺服', '牵引伺服']
+        # elif servo_num == 3:
+        #     tmp = ['弯曲伺服', '牵引伺服', '回送伺服']
+        # elif servo_num == 4:
+        #     tmp = ['左移动伺服', '左弯曲伺服', '右移动伺服', '右弯曲伺服']
+        # else:
+        #     return row.from_servo
 
-        return tmp[row.from_servo]
+        return tmp[row.from_servo - 1]
 
     def get_alarm_starttime(self, row):
         return row.alarm_starttime.strftime('%Y-%m-%d %H:%M:%S')
