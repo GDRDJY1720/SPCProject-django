@@ -42,7 +42,7 @@ class SalesInfo(GenericViewSet):
                 return Response(res)
             params['customer_code'] = data
 
-        sales_list = models.SalesInfo.objects.filter(**params)
+        sales_list = models.SalesInfo.objects.filter(**params).order_by('-id')
         sale_pager = self.paginate_queryset(sales_list)
         sale_ser = self.get_serializer(sale_pager, many=True)
 
@@ -70,6 +70,7 @@ class SalesInfo(GenericViewSet):
         sell_time = int(request.data.get('sell_time', None)) / 1000
         sell_code = request.data.get('sell_code', None)
         sell_site = request.data.get('sell_site', None)
+        company_name = request.data.get('company_name', None)
 
         if customer_code:
             params['customer_code'] = customer_code
@@ -83,6 +84,8 @@ class SalesInfo(GenericViewSet):
             params['sell_code'] = sell_code
         if sell_site:
             params['sell_site'] = sell_site
+        if company_name:
+            params['company_name'] = company_name
 
         try:
             sale_obj = models.SalesInfo.objects.create(**params)
@@ -154,6 +157,8 @@ class SalesInfo(GenericViewSet):
             res['msg'] = 'customer_code参数缺失'
             return Response(res)
         params['customer_code'] = customer_code
+
+        params['company_name'] = request.data.get('company_name', None)
 
         sell_time = int(request.data.get('sell_time', None)) / 1000
         if sell_time:

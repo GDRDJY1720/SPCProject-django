@@ -48,7 +48,7 @@ class QueryPropertyListView(GenericAPIView, ali_api.APIRun):
     @staticmethod
     def get_property_info(data: dict) -> list:
         identifier_list = ['Voltage', 'Speed', 'Current', 'Torque', 'Error', 'TotalOutput', 'TotalRunTime',
-                           'CellSignalStrength', 'SRuntime', 'Latitude', 'Longitude']
+                           'CellSignalStrength', 'SRuntime', 'Latitude', 'Longitude', 'TaskStatus', 'DeviceOnLock']
         tmp_data = data.get('properties')
         # print(tmp_data)
         result = []

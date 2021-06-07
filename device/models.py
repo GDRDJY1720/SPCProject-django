@@ -13,6 +13,7 @@ class Device(models.Model):
     fk_sales = models.ForeignKey(to='sale.SalesInfo', on_delete=models.SET_NULL, null=True)
     actual_device_secret = models.CharField('设备序列号', max_length=32, null=True, unique=True)
     module_secret = models.CharField(max_length=32, null=True, unique=True)
+    module_secret_two = models.CharField(max_length=32, null=True, unique=True)
     hmi_secret = models.CharField(max_length=32, null=True, unique=True)
     device_lock = models.BooleanField(default=False)
     device_type = models.IntegerField(default=2)

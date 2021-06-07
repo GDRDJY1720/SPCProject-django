@@ -63,9 +63,10 @@ class UserView(GenericViewSet):
 
         try:
             models.UserInfo.objects.create(**data)
-        except IntegrityError:
+        except IntegrityError as i:
+            print(i)
             res['code'] = 1018
-            res['msg'] = '手机号已注册'
+            res['msg'] = ''
             return Response(res)
         except Exception as e:
             print(e)
