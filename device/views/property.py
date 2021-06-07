@@ -47,7 +47,6 @@ class PropertyInfoView(GenericViewSet, ali_api.APIRun):
             servo_num = int(device.fk_product.product_servo_num)
 
         data = self.get_property_info(data=json.loads(dic.get('Data').get('ThingModelJson')), servo_num=servo_num)
-        print(data)
         ser = self.get_serializer(instance=device, context={'request': request, 'data': data, 'servo_num': servo_num})
 
         res['data'] = ser.data
@@ -135,8 +134,6 @@ class PropertyInfoView(GenericViewSet, ali_api.APIRun):
         else:
             res['data'] = res_data
 
-        print(res['data'], api_name)
-
         return Response(res)
 
     @staticmethod
@@ -145,8 +142,6 @@ class PropertyInfoView(GenericViewSet, ali_api.APIRun):
         result = {}
 
         tmp_data = data.get('properties')
-        import pprint
-        pprint.pprint(data)
 
         for i in range(1, servo_num + 1):
             identifier_list = [j + '_' + str(i) for j in tmp]
@@ -185,7 +180,6 @@ class SetPropertyView(GenericViewSet, ali_api.APIRun):
             res['code'] = 1050
             res['msg'] = 'productID参数缺失'
             return Response(res)
-        print(product_id)
 
         product_obj = Pmodels.Product.objects.filter(id=product_id).first()
         dic = self.get_api_run(api_name='QueryThingModel', res=res, ProductKey=product_obj.product_key)

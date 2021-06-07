@@ -43,15 +43,17 @@ class DeviceSerializer(serializers.ModelSerializer):
     def get_fk_sales(self, row):
         res = {}
         if row.fk_sales is None:
-            res['customer_code'] = None
-            res['sell_code'] = None
-            res['sell_site'] = None
-            res['sell_time'] = None
+            for k in row.fk_sales.__dict__.keys():
+                if k != '_state' and k != 'id':
+                    res[k] = None
         else:
-            res['customer_code'] = row.fk_sales.customer_code
-            res['sell_code'] = row.fk_sales.sell_code
-            res['sell_site'] = row.fk_sales.sell_site
-            res['sell_time'] = row.fk_sales.sell_time.strftime('%Y-%m-%d %H:%M:%S')
+            for k in row.fk_sales.__dict__.keys():
+                if k != '_state' and k != 'id':
+                    t = getattr(row.fk_sales, k)
+                    if k == 'sell_time':
+                        res[k] = t.strftime('%Y-%m-%d %H:%M:%S')
+                    else:
+                        res[k] = t
 
         return res
 
