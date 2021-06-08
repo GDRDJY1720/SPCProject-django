@@ -8,6 +8,7 @@ class Device(models.Model):
     device_name = models.CharField('设备标识名称', max_length=64, unique=True)
     device_secret = models.CharField(max_length=64, unique=True)
     iot_id = models.CharField(max_length=64, unique=True)
+    device_product_name = models.CharField(max_length=32, null=True)
     fk_product = models.ForeignKey(to='product.Product', on_delete=models.CASCADE)
     fk_user = models.ForeignKey(to='account.UserInfo', on_delete=models.DO_NOTHING, default=1, null=True)
     fk_sales = models.ForeignKey(to='sale.SalesInfo', on_delete=models.SET_NULL, null=True)

@@ -50,7 +50,7 @@ class DeviceInfoView(GenericViewSet):
                                                                    'iot_id': data.get('IotId'),
                                                                    'fk_product_id': product.id,
                                                                    # 'device_type': 1,
-                                                                   'device_secret': data.get('DeviceSecret')
+                                                                   'device_secret': data.get('DeviceSecret'),
                                                                })
             # ========================> END <==============================================
             param = {}

@@ -8,25 +8,25 @@ from rest_framework import serializers
 
 
 class DeviceSerializer(serializers.ModelSerializer):
-    fk_user = serializers.SerializerMethodField()  # 自定义显示
+    # fk_user = serializers.SerializerMethodField()  # 自定义显示
     status = serializers.SerializerMethodField()
     fk_sales = serializers.SerializerMethodField()
 
     class Meta:
         model = models.Device
-        fields = '__all__'
-        # exclude = ["fk_sales"]
+        # fields = '__all__'
+        exclude = ["fk_user"]
         # fields = ['id', 'nick_name', 'fk_product', 'fk_user']
         # fields = ['id', 'device_name']
         depth = 1
 
-    def get_fk_user(self, row):
-        # try:
-        #     ret = row.fk_user.username
-        # except Exception:
-        #     ret = None
-        # return ret
-        return None
+    # def get_fk_user(self, row):
+    #     # try:
+    #     #     ret = row.fk_user.username
+    #     # except Exception:
+    #     #     ret = None
+    #     # return ret
+    #     return None
 
     def get_status(self, row):
         if not self.context.get('data', None):
@@ -43,9 +43,9 @@ class DeviceSerializer(serializers.ModelSerializer):
     def get_fk_sales(self, row):
         res = {}
         if row.fk_sales is None:
-            for k in row.fk_sales.__dict__.keys():
-                if k != '_state' and k != 'id':
-                    res[k] = None
+            for f in Smodels.SalesInfo._meta.get_fields():
+                if f.name != 'device' and f.name != 'id':
+                    res[f.name] = None
         else:
             for k in row.fk_sales.__dict__.keys():
                 if k != '_state' and k != 'id':
