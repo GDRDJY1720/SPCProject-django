@@ -14,59 +14,6 @@ from rest_framework.response import Response
 from weixin.utils import tool
 
 
-class WXLoginViewBK(APIView):
-    """
-    这个暂时不用了，直接使用PC端的账号和密码进行登录
-    """
-    authentication_classes = []
-
-    def post(self, request, *args, **kwargs):
-        res = {'code': 1000, 'msg': ''}
-
-        code = request.data.get('code', None)
-        if code is None:
-            res['code'] = 1050
-            res['msg'] = '请求参数code不存在'
-            return Response(res)
-
-        url = 'https://api.weixin.qq.com/sns/jscode2session'
-        params = {
-            'appid': 'wx1180797827e5a4d1',
-            'secret': 'd2389770c8903ed26b66f559dfe8fd1c',
-            'js_code': code,
-            'grant_type': 'authorization_code'
-        }
-        wx_user_info = requests.get(url=url, params=params).json()
-
-        print("WXLoginView", wx_user_info)
-
-        res['sessionKey'] = wx_user_info
-        return Response(res)
-
-
-class WXPhoneNumberView(APIView):
-    authentication_classes = []
-
-    def post(self, request, *args, **kwargs):
-        res = {'code': 1000, 'msg': ''}
-
-        session_key = request.data.get('sessionKey', None)
-        encrypted_data = request.data.get('encryptedData', None)
-        iv = request.data.get('iv', None)
-        if not session_key and encrypted_data and iv:
-            res['code'] = 1051
-            res['msg'] = '参数缺失'
-            return Response(res)
-
-        app_id = 'wx1180797827e5a4d1'
-
-        pc = tool.WXBizDataCrypt(app_id, session_key)
-
-        res['data'] = pc.decrypt(encrypted_data, iv)
-        print(res['data'])
-        return Response(res)
-
-
 class WXLoginView(APIView):
     authentication_classes = []
 

@@ -6,7 +6,7 @@ from weixin.views import account, device, property, sale
 urlpatterns = [
     re_path(r'^login/$', account.WXLoginView.as_view()),
 
-    re_path(r'^phone/$', account.WXPhoneNumberView.as_view()),
+    # re_path(r'^phone/$', account.WXPhoneNumberView.as_view()),
 
     re_path(r'^device/$', device.WXDeviceInfoView.as_view({'post': 'post'})),
     re_path(r'^device/(?P<pk>\w+)/$', device.WXDeviceInfoView.as_view({'put': 'update'})),
