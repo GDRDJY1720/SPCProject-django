@@ -163,7 +163,7 @@ class DeviceInfoView(GenericViewSet):
 
         if not len(device_list):
             res['code'] = 1010
-            res['msg'] = '设备不存在'
+            res['msg'] = '无设备'
             return Response(res)
 
         iot_id_list = device_list.values_list('iot_id', flat=True)

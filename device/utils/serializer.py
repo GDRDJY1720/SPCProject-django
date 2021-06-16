@@ -51,7 +51,8 @@ class DeviceSerializer(serializers.ModelSerializer):
                 if k != '_state' and k != 'id':
                     t = getattr(row.fk_sales, k)
                     if k == 'sell_time':
-                        res[k] = t.strftime('%Y-%m-%d %H:%M:%S')
+                        # res[k] = t.strftime('%Y-%m-%d %H:%M:%S')
+                        res[k] = t.strftime('%Y-%m-%d')
                     else:
                         res[k] = t
 

@@ -1,50 +1,18 @@
 # _*_ coding:utf-8 _*_
 
+import json
 import datetime
+from rest_framework.viewsets import GenericViewSet
+from rest_framework.response import Response
 
-from sale import models
-from sale.utils import serializer
+from commonTool import ali_api
+from weixin.utils import serializer
 from utils.pagination import CommonPagination
+from sale import models
 from device import models as Dmodels
 
-from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
 
-
-class SalesInfo(GenericViewSet):
-    queryset = models.SalesInfo.objects.all()
-    serializer_class = serializer.SaleSerializer
-    pagination_class = CommonPagination
-
-    def list(self, request, *args, **kwargs):
-        res = {'code': 1000, 'msg': ''}
-
-        sales_list = models.SalesInfo.objects.all()
-        sale_pager = self.paginate_queryset(sales_list)
-        sale_ser = self.get_serializer(sale_pager, many=True)
-
-        res['data'] = sale_ser.data
-        return Response(res)
-
-    def list_limit(self, request, *args, **kwargs):
-        res = {'code': 1000, 'msg': ''}
-        params = {}
-
-        sign = kwargs.get('sign')
-        if sign == 'code':
-            data = request.query_params.get('data', None)
-            if data is None:
-                res['code'] = 1050
-                res['msg'] = 'code参数缺失'
-                return Response(res)
-            params['customer_code'] = data
-
-        sales_list = models.SalesInfo.objects.filter(**params).order_by('-id')
-        sale_pager = self.paginate_queryset(sales_list)
-        sale_ser = self.get_serializer(sale_pager, many=True)
-
-        res['data'] = sale_ser.data
-        return Response(res)
+class WXSaleView(GenericViewSet, ali_api.APIRun):
 
     def create(self, request, *args, **kwargs):
         res = {'code': 1000, 'msg': ''}
@@ -69,7 +37,7 @@ class SalesInfo(GenericViewSet):
             res['code'] = 1050
             res['msg'] = 'sell_time参数缺失'
             return Response(res)
-        sell_time = int(sell_time) / 1000
+        sell_time = int(sell_time)
 
         sell_code = request.data.get('sell_code', None)
         sell_site = request.data.get('sell_site', None)
@@ -101,53 +69,6 @@ class SalesInfo(GenericViewSet):
 
         return Response(res)
 
-    def destroy(self, request, *args, **kwargs):
-        """
-        应该在删除之前，检查这个订单下面还有没有设备，如果没有就直接删除订单
-        :return:
-        """
-        res = {'code': 1000, 'msg': ''}
-
-        device_id = request.data.get('deviceId', None)
-        if device_id is None:
-            res['code'] = 1050
-            res['msg'] = 'deviceId参数缺失'
-            return Response(res)
-
-        Dmodels.Device.objects.filter(id=device_id).update(fk_sales=None)
-
-        return Response(res)
-
-    def update(self, request, *args, **kwargs):
-        res = {'code': 1000, 'msg': ''}
-
-        sell_id = request.data.get('sellId', None)
-        if sell_id is None:
-            res['code'] = 1050
-            res['msg'] = 'sellId参数缺失'
-            return Response(res)
-
-        device_id = request.data.get('deviceId', None)
-        if device_id is None:
-            res['code'] = 1050
-            res['msg'] = 'deviceId参数缺失'
-            return Response(res)
-
-        sale_obj = models.SalesInfo.objects.filter(id=sell_id).first()
-        if sale_obj is None:
-            res['code'] = 1049
-            res['msg'] = '无订单信息'
-            return Response(res)
-
-        device_obj = Dmodels.Device.objects.filter(id=device_id)
-        if device_obj.first() is None:
-            res['code'] = 1049
-            res['msg'] = '设备不存在'
-            return Response(res)
-
-        device_obj.update(fk_sales=sale_obj)
-        return Response(res)
-
     def update_info(self, request, *args, **kwargs):
         res = {'code': 1000, 'msg': ''}
         params = {}
@@ -165,7 +86,7 @@ class SalesInfo(GenericViewSet):
 
         sell_time = request.data.get('sell_time', None)
         if sell_time is not None:
-            sell_time = int(sell_time) / 1000
+            sell_time = int(sell_time)
             params['sell_time'] = datetime.datetime.fromtimestamp(sell_time)
         else:
             res['code'] = 1050

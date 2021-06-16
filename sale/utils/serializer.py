@@ -16,4 +16,5 @@ class SaleSerializer(serializers.ModelSerializer):
     def get_sell_time(self, row):
         if row.sell_time is None:
             return None
-        return row.sell_time.strftime('%Y-%m-%d %H:%M:%S')
+        # return row.sell_time.strftime('%Y-%m-%d %H:%M:%S')
+        return row.sell_time.strftime('%Y-%m-%d')
