@@ -47,15 +47,14 @@ class QueryPropertyListView(GenericAPIView, ali_api.APIRun):
 
     @staticmethod
     def get_property_info(data: dict) -> list:
-        identifier_list = ['Voltage', 'Speed', 'Current', 'Torque', 'Error', 'TotalOutput', 'TotalRunTime',
-                           'CellSignalStrength', 'SRuntime', 'Latitude', 'Longitude', 'TaskStatus', 'DeviceOnLock']
+        identifier_list = ['left_length', 'right_length', 'left_angle', 'right_angle', 'length', 'angle']
+        other_ident = ['TaskNum']
         tmp_data = data.get('properties')
         # print(tmp_data)
         result = []
 
         for d in tmp_data:
-            if d.get('identifier', None)[:-2] not in identifier_list and d.get('identifier',
-                                                                               None) not in identifier_list:
+            if d.get('identifier', None)[:-3] in identifier_list or d.get('identifier', None) in other_ident:
                 output_data = {
                     'name': d.get('name'),
                     'identifier': d.get('identifier'),
