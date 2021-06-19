@@ -24,5 +24,10 @@ class Device(models.Model):
     device_TotalRunTime = models.IntegerField(default=0)
     device_TotalOutput = models.IntegerField(default=0)
 
+    device_DelayLock = models.BooleanField('延迟锁定标志', default=False)
+    device_lock_status = models.BooleanField('设备锁定状态', default=False)
+    device_date = models.DateField('延迟日期', null=True)
+    device_download = models.BooleanField('信息下载标志', default=False)
+
 
 

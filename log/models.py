@@ -16,6 +16,7 @@ class Alarm(models.Model):
     ]
 
     device_name = models.CharField('设备标识名称', max_length=64)
+    fk_device = models.ForeignKey(to='device.Device', on_delete=models.CASCADE)
     from_servo = models.IntegerField(choices=servo_list)
     from_alarm_info = models.ForeignKey(to='AlarmInfo', on_delete=models.DO_NOTHING)
     alarm_starttime = models.DateTimeField()
@@ -30,5 +31,6 @@ class AlarmInfo(models.Model):
 
 class Run(models.Model):
     device_name = models.CharField('设备标识名称', max_length=64)
+    fk_device = models.ForeignKey(to='device.Device', on_delete=models.CASCADE)
     run_starttime = models.DateTimeField()
     run_endtime = models.DateTimeField(null=True)

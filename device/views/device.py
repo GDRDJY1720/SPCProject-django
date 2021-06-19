@@ -1,6 +1,7 @@
 # _*_ coding:utf-8 _*_
 import json
 import time
+import datetime
 
 from commonTool import ali_api
 from device import models
@@ -59,7 +60,8 @@ class DeviceInfoView(GenericViewSet):
         else:
             param = {}
         # 查询数据库中的数据传入到前端
-        iot_list = models.Device.objects.exclude(fk_product__product_type='test').filter(**param).order_by('-id').values_list(
+        iot_list = models.Device.objects.exclude(fk_product__product_type='test').filter(**param).order_by(
+            '-id').values_list(
             'iot_id', flat=True)
         if not iot_list:
             res['data'] = []
@@ -479,17 +481,88 @@ class DeviceLockView(GenericViewSet, ali_api.APIRun):
             if res['code'] != 1000:
                 return Response(res)
 
-            models.Device.objects.filter(**params).update(device_lock=True)
+            models.Device.objects.filter(**params).update(device_lock=True, device_lock_status=True)
 
         else:
-            items = '{"DeviceOnLock":0}'
+            items = '{"DeviceOnLock":0, "DelayLock":0}'
 
             self.get_api_run(res=res, api_name='SetDeviceProperty', Items=items,
                              IotId=device_obj.iot_id)
             if res['code'] != 1000:
                 return Response(res)
 
-            models.Device.objects.filter(**params).update(device_lock=False)
+            models.Device.objects.filter(**params).update(device_lock=False, device_lock_status=False,
+                                                          device_DelayLock=False, device_download=False)
 
         return Response(res)
 
+    def delay_lock(self, request, *args, **kwargs):
+        res = {'code': 1000, 'msg': ''}
+
+        device_id = kwargs.get('pk')
+        device = models.Device.objects.filter(id=device_id)
+
+        delay_date = request.data.get('time', None)
+        if delay_date is None:
+            res['code'] = 1050
+            res['msg'] = 'date参数缺失'
+            return Response(res)
+
+        lock_date = datetime.datetime.fromtimestamp(int(delay_date) / 1000)
+
+        try:
+            device.update(device_date=lock_date, device_DelayLock=True, device_lock_status=True, device_download=False)
+        except Exception as e:
+            print(e)
+
+        return Response(res)
+
+    def delay_lock_online(self, request, *args, **kwargs):
+        """
+        当前端确定是在线的设备的时候可以请求，直接将时间信息下发至设备
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        res = {'code': 1000, 'msg': ''}
+
+        device_id = kwargs.get('pk')
+        device = models.Device.objects.filter(id=device_id)
+        device_obj = device.first()
+
+        delay_date = request.data.get('time', None)
+        if delay_date is None:
+            res['code'] = 1050
+            res['msg'] = 'date参数缺失'
+            return Response(res)
+
+        lock_date = datetime.datetime.fromtimestamp(int(delay_date) / 1000)
+
+        # 下载锁定日期
+        str1 = lock_date.strftime('%Y-%m-%d')
+        DelayLockYear, DelayLockMonth, DelayLockDay = str1.split('-', 2)
+        DelayLockYear = DelayLockYear[2:]
+        # {"DelayLockYear":21,"DelayLockMonth":6,"DelayLockDay":18,"DelayLock":1}
+        tmp_dic = {
+            'DelayLockYear': int(DelayLockYear),
+            'DelayLockMonth': int(DelayLockMonth),
+            'DelayLockDay': int(DelayLockDay),
+            'DelayLock': 1
+        }
+        items = json.dumps(tmp_dic)
+
+        self.get_api_run(res=res, api_name='SetDeviceProperty', Items=items,
+                         IotId=device_obj.iot_id)
+
+        try:
+            if res['code'] != 1000:
+                device.update(device_date=lock_date, device_DelayLock=True, device_lock_status=True)
+                res['code'] = 1000
+            else:
+                device.update(device_date=lock_date, device_DelayLock=True, device_lock_status=True,
+                              device_download=True)
+        except Exception as e:
+            print(e)
+
+        return Response(res)
