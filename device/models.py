@@ -30,4 +30,8 @@ class Device(models.Model):
     device_download = models.BooleanField('信息下载标志', default=False)
 
 
-
+class LockLog(models.Model):
+    fk_user = models.ForeignKey(to='account.UserInfo', on_delete=models.DO_NOTHING)
+    fk_device = models.ForeignKey(to='Device', on_delete=models.DO_NOTHING)
+    operate = models.CharField(max_length=16)
+    start_time = models.DateTimeField()

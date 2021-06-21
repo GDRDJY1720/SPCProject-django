@@ -35,6 +35,10 @@ class LoginView(APIView):
                                                                                       'token': m,
                                                                                       'end_time': time_out})
             token_ser = serializer.TokenSerializer(instance=token_obj, context={'request': request})
+
+            # 用户登录日志
+            models.LoginLog.objects.create(fk_user=user, start_time=now)
+
             res['data'] = token_ser.data
             return Response(res)
         else:

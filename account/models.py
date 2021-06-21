@@ -33,3 +33,9 @@ class UserToken(models.Model):
     token = models.CharField(max_length=32)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
+
+
+class LoginLog(models.Model):
+    fk_user = models.ForeignKey(to='UserInfo', on_delete=models.DO_NOTHING)
+    start_time = models.DateTimeField()
+

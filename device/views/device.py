@@ -471,6 +471,7 @@ class DeviceLockView(GenericViewSet, ali_api.APIRun):
             res['msg'] = '设备不存在'
             return Response(res)
 
+        operate = ''
         lockFlag = int(request.data.get('lockFlag', '1'))
         # lockFlag == 1表示为立即锁定，0为解除锁定
         if lockFlag:
@@ -482,6 +483,7 @@ class DeviceLockView(GenericViewSet, ali_api.APIRun):
                 return Response(res)
 
             models.Device.objects.filter(**params).update(device_lock=True, device_lock_status=True)
+            operate = '立即锁定'
 
         else:
             items = '{"DeviceOnLock":0, "DelayLock":0}'
@@ -493,6 +495,53 @@ class DeviceLockView(GenericViewSet, ali_api.APIRun):
 
             models.Device.objects.filter(**params).update(device_lock=False, device_lock_status=False,
                                                           device_DelayLock=False, device_download=False)
+            operate = '立即解锁'
+
+        # 设备锁定操作日志
+        now = datetime.datetime.now()
+        models.LockLog.objects.create(fk_user=request.user, fk_device=device_obj, operate=operate, start_time=now)
+
+        return Response(res)
+
+    def unlock(self, request, *args, **kwargs):
+        """
+        当设备离线的时候，调用此方法，解除设定的延时锁定状态及时间，但是如果已经下载过的情况下，需要设备在线才能去除
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        res = {'code': 1000, 'msg': ''}
+        params = {}
+
+        sign = request.data.get('sign', 'deviceId')
+        data = request.data.get('data', None)
+        if data is None:
+            res['code'] = 1050
+            res['msg'] = 'sign的具体参数缺失'
+            return Response(res)
+
+        if sign == 'deviceId':
+            params['id'] = data
+        elif sign == 'deviceName':
+            params['device_name'] = data
+
+        device = models.Device.objects.filter(**params)
+        device_obj = device.first()
+        if not device_obj:
+            res['code'] = 1010
+            res['msg'] = '设备不存在'
+            return Response(res)
+
+        if device_obj.device_download:
+            res['code'] = 1080
+            res['msg'] = '锁定信息已下载，请在设备在线的状态再进行解除！'
+            return Response(res)
+        else:
+            device.update(device_lock_status=False, device_DelayLock=False)
+            # 设备锁定操作日志
+            now = datetime.datetime.now()
+            models.LockLog.objects.create(fk_user=request.user, fk_device=device_obj, operate='离线解除延时锁定', start_time=now)
 
         return Response(res)
 
@@ -514,6 +563,11 @@ class DeviceLockView(GenericViewSet, ali_api.APIRun):
             device.update(device_date=lock_date, device_DelayLock=True, device_lock_status=True, device_download=False)
         except Exception as e:
             print(e)
+
+        # 设备锁定操作日志
+        now = datetime.datetime.now()
+        models.LockLog.objects.create(fk_user=request.user, fk_device=device.first(), operate='设置延时锁定时间',
+                                      start_time=now)
 
         return Response(res)
 
@@ -564,5 +618,10 @@ class DeviceLockView(GenericViewSet, ali_api.APIRun):
                               device_download=True)
         except Exception as e:
             print(e)
+
+        # 设备锁定操作日志
+        now = datetime.datetime.now()
+        models.LockLog.objects.create(fk_user=request.user, fk_device=device_obj, operate='设置延时锁定时间并下载',
+                                      start_time=now)
 
         return Response(res)
