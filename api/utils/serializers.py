@@ -9,8 +9,8 @@ from commonTool import tool
 
 
 class UserSerializer(serializers.Serializer):
-    user_id = serializers.CharField(error_messages={'required': '不能为空'})
-    user_secret = serializers.CharField(error_messages={'required': '不能为空'})
+    user_id = serializers.CharField(error_messages={'required': 'user_id不能为空'})
+    user_secret = serializers.CharField(error_messages={'required': 'user_secret不能为空'})
 
     def validate(self, data):
         user = Umodels.UserInfo.objects.filter(user_id=data.get('user_id'), user_secret=data.get('user_secret')).first()

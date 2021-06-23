@@ -36,9 +36,11 @@ class GetTokenView(APIView):
             res['token'] = m
             return Response(res)
         else:
-            res['code'] = tmp.errors.get('non_field_errors')[0].code
-            res['msg'] = tmp.errors.get('non_field_errors')[0]
+            msg = tmp.errors.get('user_id', None) or tmp.errors.get('user_secret', None)
+            res['code'] = 1001
+            res['msg'] = msg[0]
             return Response(res)
+
 
 
 
