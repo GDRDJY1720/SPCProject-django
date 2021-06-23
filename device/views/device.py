@@ -146,13 +146,13 @@ class DeviceInfoView(GenericViewSet):
                 res['msg'] = 'customerCode参数缺失'
                 return Response(res)
 
-            sale_obj = Smodels.SalesInfo.objects.filter(customer_code=customer_code).first()
+            sale_obj = Smodels.SalesInfo.objects.filter(customer_code=customer_code).all()
             if sale_obj is None:
                 res['data'] = []
                 res['count'] = 0
                 return Response(res)
 
-            param['fk_sales'] = sale_obj
+            param['fk_sales__in'] = sale_obj
 
         # 状态的筛选涉及到多次循环调用接口进行选择，同时也涉及到用户权限的问题，较为复杂，后续如有好方法再加
 
