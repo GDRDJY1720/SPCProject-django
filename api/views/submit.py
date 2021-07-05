@@ -26,6 +26,7 @@ class TaskSubmitView(GenericAPIView):
 
         url = task.task_submit_url
         data = {
+            'deviceName': device_name,
             'task_id': task.task_id,
             'taskStatus': task_status
         }

@@ -48,7 +48,7 @@ class QueryPropertyListView(GenericAPIView, ali_api.APIRun):
     @staticmethod
     def get_property_info(data: dict) -> list:
         identifier_list = ['left_length', 'right_length', 'left_angle', 'right_angle', 'length', 'angle']
-        other_ident = ['TaskNum']
+        other_ident = ['TaskNum', 'NumberRoots']
         tmp_data = data.get('properties')
         # print(tmp_data)
         result = []
@@ -142,7 +142,7 @@ class SetTaskView(GenericAPIView, ali_api.APIRun):
             return Response(res)
 
         try:
-            item['TaskFlag'] = 0
+            item['TaskStatus'] = 0
             items = json.dumps(item)
         except Exception:
             res['code'] = 1051
