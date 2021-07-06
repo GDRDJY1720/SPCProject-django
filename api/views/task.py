@@ -136,6 +136,17 @@ class SetTaskView(GenericAPIView, ali_api.APIRun):
             res['msg'] = '设备不存在'
             return Response(res)
 
+        device_api = ali_api.APIRun()
+        device_api.Api = ali_api.AliDeviceAPI()
+        dic = device_api.get_api_run(res=res, api_name="GetDeviceStatus", IotId=device.iot_id)
+        if res['code'] != 1000:
+            return Response(res)
+
+        if dic.get("Data").get("Status") != "ONLINE":
+            res['code'] = 1053
+            res['msg'] = "设备未处于在线状态，禁止下载任务"
+            return Response(res)
+
         if item is None:
             res['code'] = 1050
             res['msg'] = 'items参数缺失'
@@ -196,8 +207,11 @@ class SetTaskView(GenericAPIView, ali_api.APIRun):
                 return Response(res)
 
         # 下发任务信息
-        self.get_api_run(res=res, api_name='SetDevicesProperty', Items=items, ProductKey=device.fk_product.product_key,
-                         DeviceNameList=[device.device_name, ])
+        # self.Api = ali_api.AliPropertyAPI
+        dic = self.get_api_run(res=res, api_name='SetDevicesProperty', Items=items,
+                               ProductKey=device.fk_product.product_key,
+                               DeviceNameList=[device.device_name, ])
+        print(dic)
         if res['code'] != 1000:
             return Response(res)
         # res['data'] = items
