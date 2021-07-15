@@ -15,7 +15,7 @@ urlpatterns = [
 
     # re_path(r'^property/$', property.PropertyInfoView.as_view({'get': 'list', 'post': 'create'})),
     re_path(r'^property/(?P<pk>\w+)/$', property.PropertyInfoView.as_view({'get': 'list', 'post': 'data'})),
-    re_path(r'^setProperty/$', property.SetPropertyView.as_view({'get': 'list', 'post': 'set'}))
+    re_path(r'^setProperty/$', property.SetPropertyView.as_view({'get': 'list', 'post': 'set'})),
 
-
+    re_path(r'^updateBase/$', device.UpdateDatabase.as_view({'post': 'update'}))
 ]

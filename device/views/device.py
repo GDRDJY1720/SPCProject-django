@@ -625,3 +625,37 @@ class DeviceLockView(GenericViewSet, ali_api.APIRun):
                                       start_time=now)
 
         return Response(res)
+
+
+class UpdateDatabase(GenericViewSet):
+    authentication_classes = []
+
+    def update(self, request, *args, **kwargs):
+        """
+        更新数据到数据库
+        :return: 返回信息
+        """
+        res = {'code': 1000, 'msg': ''}
+
+        device_name = request.data.get('deviceName', None)
+        if device_name is None:
+            res['code'] = 1050
+            res['msg'] = "设备名称缺失"
+            return Response(res)
+
+        device = models.Device.objects.filter(device_name=device_name).first()
+
+        if device is None:
+            res['code'] = 1010
+            res['msg'] = "设备不存在，请检查设备名称"
+            return Response(res)
+
+        # 将参数写入数据库
+        device.device_product_name = request.data.get('deviceType', None)
+        device.module_secret = request.data.get('moduleCode', None)
+        device.actual_device_secret = request.data.get('deviceCode', None)
+        device.hmi_secret = request.data.get('hmiCode', None)
+
+        device.save()
+        
+        return Response(res)
