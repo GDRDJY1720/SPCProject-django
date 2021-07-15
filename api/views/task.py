@@ -189,7 +189,7 @@ class SetTaskView(GenericAPIView, ali_api.APIRun):
         if task_info:
             params['task_info'] = json.dumps(task_info)
             # params['task_info'] = task_info
-            print(params['task_info'], type(params['task_info']))
+            # print(params['task_info'], type(params['task_info']))
 
         if task_submit_url:
             params['task_submit_url'] = task_submit_url
@@ -207,11 +207,9 @@ class SetTaskView(GenericAPIView, ali_api.APIRun):
                 return Response(res)
 
         # 下发任务信息
-        # self.Api = ali_api.AliPropertyAPI
-        dic = self.get_api_run(res=res, api_name='SetDevicesProperty', Items=items,
-                               ProductKey=device.fk_product.product_key,
-                               DeviceNameList=[device.device_name, ])
-        print(dic)
+        self.get_api_run(res=res, api_name='SetDevicesProperty', Items=items,
+                         ProductKey=device.fk_product.product_key,
+                         DeviceNameList=[device.device_name, ])
         if res['code'] != 1000:
             return Response(res)
         # res['data'] = items

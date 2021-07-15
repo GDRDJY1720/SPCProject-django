@@ -36,7 +36,8 @@ class TaskSubmitView(GenericAPIView):
             data[i] = task_info[i]
 
         # 统一提交任务格式为POST
-        response = requests.post(url=url, data=data)
+        headers = {"Content-Type": "application/json"}
+        response = requests.post(url=url, data=data, headers=headers)
         if response.status_code != 200:
             res['code'] = 1053
             res['msg'] = f'提交任务失败，状态码：{response.status_code}'
