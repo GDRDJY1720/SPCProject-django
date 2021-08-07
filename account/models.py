@@ -26,6 +26,7 @@ class UserInfo(models.Model):
     # user_id+password+时间生成user_secret
     user_id = models.CharField(max_length=64)
     user_secret = models.CharField(max_length=64)
+    remote_control = models.BooleanField(default=False)
 
 
 class UserToken(models.Model):

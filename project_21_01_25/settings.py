@@ -144,7 +144,21 @@ REST_FRAMEWORK = {
     # 版本控制
     "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.URLPathVersioning",
     "DEFAULT_VERSION": 'v1',
-    "ALLOWED_VERSIONS": ['v1'],
+    "ALLOWED_VERSIONS": ['v1', 'v2'],
     "VERSION_PARAM": 'version',
     # 'EXCEPTION_HANDLER': 'utils.exception.exception_handler',
 }
+
+# 项目中需要用到的属性列表
+# 阿里云接口实例名称
+IOT_INSTANCE_ID = "iot-cn-st21tyzcm06"
+# 任务的基础属性
+TASK_BASICS_PROPERTIES = ['leftLength', 'rightLength', 'leftAngle', 'rightAngle', 'length', 'angle', 'loopback', 'arc']
+# 任务的其他属性
+TASK_OTHER_PROPERTIES = ['TaskNum', 'NumberRoots']
+# 伺服驱动器属性
+SERVO_PROPERTIES = ['Voltage', 'Speed', 'Current', 'Torque']
+# 生成任务属性时需要生成的其他属性（后续会与任务的其他属性进行合并）
+TAG_TASK_PROPERTIES = ["count", "diameter"]
+# 查询任务时需要额外查询的属性
+TASK_QUERY_PROPERTIES = ["status", "diameter", "quantityCount", "count"]

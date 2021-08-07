@@ -657,5 +657,5 @@ class UpdateDatabase(GenericViewSet):
         device.hmi_secret = request.data.get('hmiCode', None)
 
         device.save()
-        
+
         return Response(res)

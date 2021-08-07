@@ -3,6 +3,8 @@
 import json
 import time
 
+from django.conf import settings
+
 from commonTool import ali_api, tool
 from device import models
 from product import models as Pmodels
@@ -138,7 +140,8 @@ class PropertyInfoView(GenericViewSet, ali_api.APIRun):
 
     @staticmethod
     def get_property_info(data: dict, servo_num: int):
-        tmp = ['Voltage', 'Speed', 'Current', 'Torque']
+        # 从配置文件中读取伺服属性参数
+        tmp = settings.SERVO_PROPERTIES
         result = {}
 
         tmp_data = data.get('properties')
@@ -215,7 +218,8 @@ class SetPropertyView(GenericViewSet, ali_api.APIRun):
 
     @staticmethod
     def get_property_info(data: dict) -> list:
-        identifier_list = ['left_length', 'right_length', 'left_angle', 'right_angle', 'length', 'angle']
+        # 从配置文件中获取任务属性
+        identifier_list = settings.TASK_BASICS_PROPERTIES
         tmp_data = data.get('properties')
         result = []
 
