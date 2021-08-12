@@ -50,8 +50,8 @@ class QueryPropertyListView(GenericAPIView, ali_api.APIRun):
 
     @staticmethod
     def get_property_info(data: dict) -> list:
-        identifier_list = ['left_length', 'right_length', 'left_angle', 'right_angle', 'length', 'angle']
-        other_ident = ['TaskNum', 'NumberRoots']
+        identifier_list = settings.TASK_BASICS_PROPERTIES
+        other_ident = settings.TASK_OTHER_PROPERTIES
         tmp_data = data.get('properties')
         # print(tmp_data)
         result = []
