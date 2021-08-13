@@ -517,8 +517,10 @@ class V2QueryDeviceTaskView(GenericAPIView, ali_api.APIRun):
     def get_properties(self, res, params):
         result = []
 
+        product_key = params["device"].fk_product.product_key
+
         # 获取标签
-        dic = self.get_api_run(api_name="ListProductTags", res=res, ProductKey=params["device"].fk_product.product_key)
+        dic = self.get_api_run(api_name="ListProductTags", res=res, ProductKey=product_key)
         if res['code'] != 1000:
             return Response(res)
 
@@ -530,8 +532,11 @@ class V2QueryDeviceTaskView(GenericAPIView, ali_api.APIRun):
                     result.append("current" + tmp + "_" + (str(j) if j > 9 else "0" + str(j)))
 
         # 添加额外需要查询的属性
-        for i in settings.TASK_QUERY_PROPERTIES:
-            result.append("current" + i[0:1].capitalize() + i[1:])
+        for j in settings.PRODUCT_PROPERTIES:
+            if product_key in j["product"]:
+                params["query"] = j["query"]
+                for i in j["query"]:
+                    result.append("current" + i[0:1].capitalize() + i[1:])
 
         # 添加到params中
         params["items"] = result
@@ -553,7 +558,7 @@ class V2QueryDeviceTaskView(GenericAPIView, ali_api.APIRun):
             if i["TagKey"] != "servo":
                 result[i["TagKey"]] = [0 for x in range(0, int(i["TagValue"].split("_")[1]))]
 
-        for j in settings.TASK_QUERY_PROPERTIES:
+        for j in params["query"]:
             result[j] = 0
 
         # 扫描任务属性列表，每遇到一个就从名称中提取出下标

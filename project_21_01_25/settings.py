@@ -161,7 +161,7 @@ SERVO_PROPERTIES = ['Voltage', 'Speed', 'Current', 'Torque']
 # 生成任务属性时需要生成的其他属性（后续会与任务的其他属性进行合并）
 TAG_TASK_PROPERTIES = ["count", "diameter"]
 # 查询任务时需要额外查询的属性
-TASK_QUERY_PROPERTIES = ["status", "diameter", "quantityCount", "count"]
+# TASK_QUERY_PROPERTIES = ["status", "diameter", "quantityCount", "count"]
 # 各个产品系列对应的查询属性名称(v2用)
 PRODUCT_PROPERTIES = [
     # 弯曲中心
@@ -173,7 +173,8 @@ PRODUCT_PROPERTIES = [
                 {"key": 'count', "name": "计划产量"},
                 {"key": 'diameter', "name": "钢筋直径"},
             ]
-        }
+        },
+        "query": ["status", "diameter", "quantityCount", "count"]
     },
     # 一体机系列
     {
@@ -184,7 +185,8 @@ PRODUCT_PROPERTIES = [
                 {"key": 'count', "name": "计划产量"},
                 {"key": 'diameter', "name": "钢筋直径"},
             ]
-        }
+        },
+        "query": ["status", "diameter", "quantityCount", "count"]
     },
     # 剪切锯切系列
     {
@@ -196,7 +198,8 @@ PRODUCT_PROPERTIES = [
                 {"key": 'times', "name": "加工次数"},
                 {"key": 'diameter', "name": "钢筋直径"},
             ]
-        }
+        },
+        "query": ["status", "diameter"]
     },
     # 滚笼焊系列
     {
@@ -204,7 +207,8 @@ PRODUCT_PROPERTIES = [
         "property": {
             "list": [],
             "int": []
-        }
+        },
+        "query": []
     },
     # 高速调直机系列
     {
@@ -216,7 +220,8 @@ PRODUCT_PROPERTIES = [
                 {"key": 'count', "name": "计划产量"},
                 {"key": 'diameter', "name": "钢筋直径"},
             ]
-        }
+        },
+        "query": ["status", "diameter", "quantityCount", "count"]
     },
     # 五机头系列
     {
@@ -224,6 +229,7 @@ PRODUCT_PROPERTIES = [
         "property": {
             "list": [],
             "int": []
-        }
+        },
+        "query": []
     }
 ]
