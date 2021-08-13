@@ -38,7 +38,7 @@ class GetTokenView(APIView):
         else:
             msg = tmp.errors.get('user_id', None) or tmp.errors.get('user_secret', None)
             res['code'] = 1001
-            res['msg'] = msg[0]
+            res['msg'] = "用户不存在" if msg is None else msg[0]
             return Response(res)
 
 

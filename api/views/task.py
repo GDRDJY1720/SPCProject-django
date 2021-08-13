@@ -488,8 +488,6 @@ class V2QueryDeviceTaskView(GenericAPIView, ali_api.APIRun):
 
                 res_data += dic.get('PropertyDataInfos').get('PropertyDataInfo')
 
-        import pprint
-        pprint.pprint(res_data)
         # 将查询到的属性组合成易识别格式（数组）
         res["data"] = self.get_current_task(res_data, params)
 
