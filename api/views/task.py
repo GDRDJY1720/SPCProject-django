@@ -199,7 +199,6 @@ class V2QueryPropertyListView(GenericAPIView, ali_api.APIRun):
             res['msg'] = 'productKey参数未找到'
             return Response(res)
 
-        # device = Dmodels.Device.objects.filter(actual_device_secret=device_secret).first()
         product = Pmodels.Product.objects.filter(product_key=product_key).first()
         if not product:
             res['code'] = 1051
@@ -208,63 +207,49 @@ class V2QueryPropertyListView(GenericAPIView, ali_api.APIRun):
 
         # 获取标签中的长度角度等属性的数量的字典（长度角度的定义为约定）
         test = self.get_api_run(api_name="ListProductTags", res=res, ProductKey=product.product_key)
+        if res['code'] != 1000:
+            return Response(res)
 
         # 如果获取成功，将获取的信息通过固定方法进行组合成为新的返回
-        properties = self.get_property_number(test)
+        properties = self.get_property_number(test, product.product_key)
 
         # 返回新的字典
         res["data"] = {
             'productName': product.product_name,
+            "productKey": product.product_key,
             "properties": properties
         }
 
         return Response(res)
 
     @staticmethod
-    def get_property_info(data: dict) -> list:
-        identifier_list = settings.TASK_BASICS_PROPERTIES
-        other_ident = settings.TASK_OTHER_PROPERTIES
-        tmp_data = data.get('properties')
-        result = []
-
-        for d in tmp_data:
-            if d.get('identifier', None)[:-3] in identifier_list or d.get('identifier', None) in other_ident:
-                output_data = {
-                    'name': d.get('name'),
-                    'identifier': d.get('identifier'),
-                    'unit': d.get('dataSpecs').get('unit'),
-                    'max': d.get('dataSpecs').get('max'),
-                    'min': d.get('dataSpecs').get('min'),
-                    'step': d.get('dataSpecs').get('step')
-                }
-                result.append(output_data)
-
-        return result
-
-    def get_property_number(self, data: dict) -> list:
+    def get_property_number(data: dict, key: str) -> list:
         res = []
-        if data is None:
-            return []
 
-        property_list = data.get("Data").get("ProductTag")
-        if property_list is None or len(property_list) == 0:
-            return []
+        # 查询产品的对应属性值
+        for i in settings.PRODUCT_PROPERTIES:
+            if key in i["product"]:
+                # 将list的属性组成数组，放入结果数组中
+                property_list = data.get("Data").get("ProductTag")
+                if property_list is None or len(property_list) == 0:
+                    return []
 
-        for i in property_list:
-            if i["TagKey"] in settings.TASK_BASICS_PROPERTIES:
-                res.append({
-                    "key": i["TagKey"],
-                    "type": "List",
-                    "maxLength": i["TagValue"]
-                })
+                for k in property_list:
+                    if k["TagKey"] in i["property"]["list"]:
+                        name, value = k["TagValue"].split("_")
+                        res.append({
+                            "key": k["TagKey"],
+                            "name": name,
+                            "type": "List",
+                            "maxLength": int(value)
+                        })
 
-        # 将非基础属性添加到返回信息中
-        for i in settings.TAG_TASK_PROPERTIES:
-            res.append({
-                "key": i,
-                "type": "Int"
-            })
+                # 将int的属性组成普通dic，放入结果数组中
+                for j in i["property"]["int"]:
+                    j["type"] = "Int"
+                    res.append(j)
 
+        # 返回结果数组
         return res
 
 
@@ -370,11 +355,14 @@ class V2SetTaskView(GenericAPIView, ali_api.APIRun):
         for i in dic["Data"]["ProductTag"]:
             task_property.append(i.get("TagKey"))
 
-        for k in item.keys():
-            if k not in settings.TAG_TASK_PROPERTIES and k not in task_property:
-                res['code'] = 1050
-                res['msg'] = '任务参数与设备不匹配，请检查后重新提交'
-                return Response(res)
+        for i in settings.PRODUCT_PROPERTIES:
+            if device.fk_product.product_key in i["product"]:
+                tmp = [j["key"] for j in i["property"]["int"]]
+                for k in item.keys():
+                    if k not in tmp and k not in task_property:
+                        res['code'] = 1050
+                        res['msg'] = '任务参数与设备不匹配，请检查后重新提交'
+                        return Response(res)
 
         # 检测任务的提交信息
         if task_submit_info is not None and type(task_submit_info) != list:
@@ -433,9 +421,12 @@ class V2SetTaskView(GenericAPIView, ali_api.APIRun):
 
         # 循环提取item中的每一项value
         for key in item:
-            for index, value in enumerate(item[key]):
-                # 循环期间，key后面加'_${index}',组合阿里匹配的任务字符串
-                result[key + "_" + (str(index + 1) if index + 1 > 9 else "0" + str(index + 1))] = value
+            if type(item[key]) == list:
+                for index, value in enumerate(item[key]):
+                    # 循环期间，key后面加'_${index}',组合阿里匹配的任务字符串
+                    result[key + "_" + (str(index + 1) if index + 1 > 9 else "0" + str(index + 1))] = value
+            else:
+                result[key] = item[key]
 
         # 返回该字符串
         return result
@@ -497,6 +488,8 @@ class V2QueryDeviceTaskView(GenericAPIView, ali_api.APIRun):
 
                 res_data += dic.get('PropertyDataInfos').get('PropertyDataInfo')
 
+        import pprint
+        pprint.pprint(res_data)
         # 将查询到的属性组合成易识别格式（数组）
         res["data"] = self.get_current_task(res_data, params)
 
@@ -533,7 +526,7 @@ class V2QueryDeviceTaskView(GenericAPIView, ali_api.APIRun):
         for i in dic["Data"]["ProductTag"]:
             if i["TagKey"] != "servo":
                 tmp = i["TagKey"][0:1].capitalize() + i["TagKey"][1:]
-                for j in range(1, int(i["TagValue"]) + 1):
+                for j in range(1, int(i["TagValue"].split("_")[1]) + 1):
                     result.append("current" + tmp + "_" + (str(j) if j > 9 else "0" + str(j)))
 
         # 添加额外需要查询的属性
@@ -553,11 +546,12 @@ class V2QueryDeviceTaskView(GenericAPIView, ali_api.APIRun):
         :return: 返回转化结果
         """
         result = {}
+        # print(task, params)
 
         # 根据标签生成对应的字典，数组中填出对应的数量，值都为0
         for i in params["task_property"]:
             if i["TagKey"] != "servo":
-                result[i["TagKey"]] = [0 for x in range(0, int(i["TagValue"]))]
+                result[i["TagKey"]] = [0 for x in range(0, int(i["TagValue"].split("_")[1]))]
 
         for j in settings.TASK_QUERY_PROPERTIES:
             result[j] = 0
@@ -567,10 +561,16 @@ class V2QueryDeviceTaskView(GenericAPIView, ali_api.APIRun):
             # 检查是否有属性，如果没有属性就不变
             if len(i["List"]["PropertyInfo"]):
                 # 如果有属性的，就取第一条属性的值转为int型填写入对应的数组中的下标中
-                key, index = i["Identifier"].split("_")
-                tmp = key.split("current")[1]
-                key = tmp[0:1].lower() + tmp[1:]
-                result[key][int(index) - 1] = int(i["List"]["PropertyInfo"][0]["Value"])
+                try:
+                    # 尝试能够使用“_”分割，如果不行就是其他的数据
+                    key, index = i["Identifier"].split("_")
+                    tmp = key.split("current")[1]
+                    key = tmp[0:1].lower() + tmp[1:]
+                    result[key][int(index) - 1] = int(i["List"]["PropertyInfo"][0]["Value"])
+                except Exception:
+                    tmp = i["Identifier"].split("current")[1]
+                    key = tmp[0:1].lower() + tmp[1:]
+                    result[key] = int(i["List"]["PropertyInfo"][0]["Value"])
 
         # 返回转化的结果
         return result

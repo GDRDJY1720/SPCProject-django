@@ -152,9 +152,9 @@ REST_FRAMEWORK = {
 # 项目中需要用到的属性列表
 # 阿里云接口实例名称
 IOT_INSTANCE_ID = "iot-cn-st21tyzcm06"
-# 任务的基础属性
+# 任务的基础属性（v1用）
 TASK_BASICS_PROPERTIES = ['leftLength', 'rightLength', 'leftAngle', 'rightAngle', 'length', 'angle', 'loopback', 'arc']
-# 任务的其他属性
+# 任务的其他属性（v1用）
 TASK_OTHER_PROPERTIES = ['TaskNum', 'NumberRoots']
 # 伺服驱动器属性
 SERVO_PROPERTIES = ['Voltage', 'Speed', 'Current', 'Torque']
@@ -162,3 +162,68 @@ SERVO_PROPERTIES = ['Voltage', 'Speed', 'Current', 'Torque']
 TAG_TASK_PROPERTIES = ["count", "diameter"]
 # 查询任务时需要额外查询的属性
 TASK_QUERY_PROPERTIES = ["status", "diameter", "quantityCount", "count"]
+# 各个产品系列对应的查询属性名称(v2用)
+PRODUCT_PROPERTIES = [
+    # 弯曲中心
+    {
+        "product": ["g0p4lIsqPV6"],
+        "property": {
+            "list": ['leftLength', 'rightLength', 'leftAngle', 'rightAngle'],
+            "int": [
+                {"key": 'count', "name": "计划产量"},
+                {"key": 'diameter', "name": "钢筋直径"},
+            ]
+        }
+    },
+    # 一体机系列
+    {
+        "product": ["g0p4txvTEE5", "g0p4nlVxOkV"],
+        "property": {
+            "list": ['length', 'angle', 'loopback', 'arc'],
+            "int": [
+                {"key": 'count', "name": "计划产量"},
+                {"key": 'diameter', "name": "钢筋直径"},
+            ]
+        }
+    },
+    # 剪切锯切系列
+    {
+        "product": ["g0p4RUnQtgI", "g0p4nTrjfyq"],
+        "property": {
+            "list": [],
+            "int": [
+                {"key": 'length', "name": "加工长度"},
+                {"key": 'times', "name": "加工次数"},
+                {"key": 'diameter', "name": "钢筋直径"},
+            ]
+        }
+    },
+    # 滚笼焊系列
+    {
+        "product": ["g0p4tpPud99"],
+        "property": {
+            "list": [],
+            "int": []
+        }
+    },
+    # 高速调直机系列
+    {
+        "product": ["g0p4DBrYoGw"],
+        "property": {
+            "list": [],
+            "int": [
+                {"key": 'length', "name": "加工长度"},
+                {"key": 'count', "name": "计划产量"},
+                {"key": 'diameter', "name": "钢筋直径"},
+            ]
+        }
+    },
+    # 五机头系列
+    {
+        "product": ["g0p4iqEI2V5"],
+        "property": {
+            "list": [],
+            "int": []
+        }
+    }
+]
